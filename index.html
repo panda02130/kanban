@@ -8,8 +8,7 @@
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:#f5f6fa;min-height:100vh;color:#1a1a2e}
 
-/* Header */
-header{background:#fff;padding:16px 32px;box-shadow:0 1px 4px rgba(0,0,0,.06);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+header{background:#fff;padding:14px 28px;box-shadow:0 1px 4px rgba(0,0,0,.06);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
 header h1{font-size:22px;font-weight:700}
 .hdr-right{display:flex;align-items:center;gap:10px}
 .hdr-btn{padding:7px 16px;border:1px solid #d9d9d9;border-radius:6px;background:#fff;cursor:pointer;font-size:13px;transition:all .15s}
@@ -17,20 +16,23 @@ header h1{font-size:22px;font-weight:700}
 .btn-add{background:#4361ee!important;color:#fff!important;border-color:#4361ee!important;font-weight:500}
 .btn-add:hover{background:#3651d4!important}
 
-/* Filter bar */
-.filters{background:#fff;padding:12px 32px;border-bottom:1px solid #eee;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+/* Sync indicator */
+.sync-status{font-size:12px;padding:4px 10px;border-radius:12px;display:inline-flex;align-items:center;gap:4px}
+.sync-ok{background:#e8f5e9;color:#2e7d32}
+.sync-ing{background:#fff3e0;color:#e65100}
+.sync-err{background:#fce4ec;color:#c62828;cursor:pointer}
+
+.filters{background:#fff;padding:12px 28px;border-bottom:1px solid #eee;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
 .filters label{font-size:13px;color:#888;white-space:nowrap}
 .filters select{padding:5px 10px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;outline:none}
 .filters select:focus{border-color:#4361ee}
 .filters input[type=text]{padding:5px 10px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;outline:none;width:180px}
 .filters input:focus{border-color:#4361ee}
 
-/* Stats */
-.stats{padding:10px 32px;display:flex;gap:16px;font-size:13px;color:#888}
+.stats{padding:10px 28px;display:flex;gap:16px;font-size:13px;color:#888}
 .stats b{color:#333}
 
-/* Table wrapper */
-.table-wrap{padding:0 32px 32px}
+.table-wrap{padding:0 28px 32px}
 table{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.05)}
 thead{background:#fafafa}
 th{padding:12px 14px;text-align:left;font-size:13px;font-weight:600;color:#666;border-bottom:2px solid #eee;white-space:nowrap;user-select:none;cursor:pointer}
@@ -42,50 +44,40 @@ tr:hover td{background:#f8f9fe}
 tr.done-row td{opacity:.55}
 tr.done-row .task-name{text-decoration:line-through}
 
-/* Status badge */
 .status-badge{display:inline-block;font-size:12px;padding:3px 10px;border-radius:12px;font-weight:500;white-space:nowrap;cursor:pointer;transition:all .15s;user-select:none}
 .status-badge:hover{filter:brightness(.92)}
 .st-todo{background:#fff3e0;color:#e65100}
 .st-progress{background:#e3f2fd;color:#1565c0}
 .st-done{background:#e8f5e9;color:#2e7d32}
 
-/* Priority */
 .pri-tag{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:500;white-space:nowrap}
 .pri-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
 .pri-dot.high{background:#e55}
 .pri-dot.medium{background:#f77f00}
 .pri-dot.low{background:#2ec4b6}
 
-/* Project tag */
 .proj-tag{display:inline-block;font-size:12px;padding:2px 10px;border-radius:5px;font-weight:500;white-space:nowrap}
 
-/* Due date */
 .overdue{color:#e55;font-weight:600}
 .due-soon{color:#f77f00;font-weight:500}
 
-/* Link */
 .shimo-link{color:#4361ee;text-decoration:none;font-size:13px;display:inline-flex;align-items:center;gap:3px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .shimo-link:hover{text-decoration:underline}
 
-/* Actions */
 .row-actions{display:flex;gap:4px}
 .row-actions button{width:28px;height:28px;border:none;background:transparent;cursor:pointer;font-size:14px;color:#bbb;border-radius:6px;display:flex;align-items:center;justify-content:center;transition:all .12s}
 .row-actions .ra-edit:hover{background:#eef;color:#4361ee}
 .row-actions .ra-del:hover{background:#fee;color:#e55}
 .row-actions .ra-detail:hover{background:#efe;color:#2e7d32}
-
-/* Detail row */
-tr.detail-row td{background:#fafbfe;padding:8px 14px 12px;border-bottom:1px solid #eee}
-.detail-content{font-size:13px;color:#555;line-height:1.7;white-space:pre-wrap;word-break:break-word;max-width:800px}
-.detail-content:empty::before{content:'暂无详情';color:#ccc}
-.detail-toggle{display:inline-flex;align-items:center;gap:2px;font-size:12px;color:#999;cursor:pointer;border:none;background:none;padding:2px 4px;border-radius:4px;transition:all .12s}
-.detail-toggle:hover{color:#4361ee;background:#eef}
 .has-detail{color:#4361ee}
 
-/* Empty state */
-.empty{text-align:center;padding:60px 20px;color:#aaa;font-size:15px}
+tr.detail-row td{background:#fafbfe;padding:8px 14px 12px;border-bottom:1px solid #eee}
+.detail-content{font-size:13px;color:#555;line-height:1.7;white-space:pre-wrap;word-break:break-word;max-width:800px}
 
-/* Modal */
+.empty{text-align:center;padding:60px 20px;color:#aaa;font-size:15px}
+.add-btn{background:none;border:none;padding:8px 16px;width:100%;text-align:left;cursor:pointer;color:#666;font-size:13px;border-radius:8px;transition:background .15s}
+.add-btn:hover{background:rgba(0,0,0,.05)}
+
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:100;align-items:center;justify-content:center}
 .modal-overlay.show{display:flex}
 .modal{background:#fff;border-radius:12px;padding:26px 30px;width:500px;max-width:92vw;box-shadow:0 12px 40px rgba(0,0,0,.2);max-height:90vh;overflow-y:auto}
@@ -93,9 +85,10 @@ tr.detail-row td{background:#fafbfe;padding:8px 14px 12px;border-bottom:1px soli
 .fg{margin-bottom:14px}
 .fg label{display:block;font-size:13px;font-weight:500;margin-bottom:5px;color:#555}
 .fg input,.fg select,.fg textarea{width:100%;padding:9px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:14px;outline:none;transition:border .15s;font-family:inherit}
-.fg input:focus,.fg select:focus{border-color:#4361ee}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:#4361ee}
 .fg-row{display:flex;gap:12px}
 .fg-row .fg{flex:1}
+.fg .hint{font-size:11px;color:#aaa;margin-top:4px}
 .chip-group{display:flex;gap:6px;flex-wrap:wrap}
 .chip{font-size:12px;padding:5px 14px;border-radius:6px;cursor:pointer;border:2px solid transparent;transition:all .15s;user-select:none}
 .chip:hover{filter:brightness(.92)}
@@ -107,7 +100,16 @@ tr.detail-row td{background:#fafbfe;padding:8px 14px 12px;border-bottom:1px soli
 .m-danger{color:#e55!important;border-color:#e55!important;margin-right:auto}
 .m-danger:hover{background:#fee!important}
 
-/* Responsive */
+/* Setup modal */
+.setup-box{text-align:center;padding:60px 20px}
+.setup-box h2{margin-bottom:12px}
+.setup-box p{color:#888;font-size:14px;margin-bottom:24px;line-height:1.6}
+.setup-box input{width:320px;max-width:90%;padding:10px 14px;border:1px solid #d9d9d9;border-radius:6px;font-size:14px;outline:none;margin-bottom:12px}
+.setup-box input:focus{border-color:#4361ee}
+.setup-box button{padding:10px 28px;border:none;background:#4361ee;color:#fff;border-radius:6px;font-size:14px;cursor:pointer}
+.setup-box button:hover{background:#3651d4}
+.setup-box .err{color:#e55;font-size:13px;margin-top:8px}
+
 @media(max-width:768px){
   header{padding:12px 16px}
   .filters,.stats,.table-wrap{padding-left:16px;padding-right:16px}
@@ -117,11 +119,27 @@ tr.detail-row td{background:#fafbfe;padding:8px 14px 12px;border-bottom:1px soli
 </head>
 <body>
 
+<!-- Setup screen (shown on first visit) -->
+<div id="setupScreen" style="display:none">
+  <header><h1>待办看板</h1></header>
+  <div class="setup-box">
+    <h2>首次使用设置</h2>
+    <p>输入你的 GitHub Token 以启用多设备数据同步<br>Token 仅保存在本设备浏览器中，不会上传</p>
+    <div><input type="password" id="setupToken" placeholder="粘贴 GitHub Token (ghp_xxx...)"></div>
+    <div><button onclick="finishSetup()">确认连接</button></div>
+    <div class="err" id="setupErr"></div>
+  </div>
+</div>
+
+<!-- Main app -->
+<div id="mainApp" style="display:none">
 <header>
   <h1>待办看板</h1>
   <div class="hdr-right">
+    <span class="sync-status sync-ok" id="syncBadge" title="点击手动同步" onclick="doSync()" style="cursor:pointer">已同步</span>
     <button class="hdr-btn" onclick="exportData()">导出</button>
     <button class="hdr-btn" onclick="importData()">导入</button>
+    <button class="hdr-btn" onclick="resetToken()">切换设备</button>
     <button class="hdr-btn btn-add" onclick="openModal()">+ 新建任务</button>
   </div>
 </header>
@@ -166,8 +184,9 @@ tr.detail-row td{background:#fafbfe;padding:8px 14px 12px;border-bottom:1px soli
   </table>
   <div class="empty" id="emptyState" style="display:none">暂无任务，点击「+ 新建任务」开始添加</div>
 </div>
+</div>
 
-<!-- Modal -->
+<!-- Task Modal -->
 <div class="modal-overlay" id="cardModal">
   <div class="modal">
     <h2 id="mTitle">新建任务</h2>
@@ -225,7 +244,14 @@ tr.detail-row td{background:#fafbfe;padding:8px 14px 12px;border-bottom:1px soli
 <input type="file" id="importFile" accept=".json" style="display:none">
 
 <script>
-// ── Config ──
+// ══════════════════════════════════════
+// Config
+// ══════════════════════════════════════
+const REPO_OWNER='panda02130';
+const REPO_NAME='kanban';
+const DATA_FILE='data.json';
+const API_BASE='https://api.github.com';
+
 const PROJECTS=[
   {name:'人文中价',color:'#4361ee'},
   {name:'思维中价',color:'#9b5de5'},
@@ -240,37 +266,157 @@ const PRI_MAP={high:'高',medium:'中',low:'低'};
 const PRI_ORDER={high:0,medium:1,low:2};
 const STATUS_ORDER={todo:0,progress:1,done:2};
 
-// ── State ──
-let state=load();
+// ══════════════════════════════════════
+// State
+// ══════════════════════════════════════
+let state={cards:[]};
+let fileSha=null;
 let editingId=null;
 let sortKey='',sortDir=1;
 let expandedIds=new Set();
+let saveTimer=null;
+let ghToken='';
 
-function load(){try{const r=localStorage.getItem('kanban_v3');if(r){const s=JSON.parse(r);if(s.cards)return s}}catch(e){}return{cards:[]}}
-function persist(){localStorage.setItem('kanban_v3',JSON.stringify(state))}
-function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
 function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
 function todayStr(){return new Date().toISOString().slice(0,10)}
+function addDays(ds,n){const d=new Date(ds);d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)}
 
-// ── Sort ──
-function sortBy(key){
-  if(sortKey===key){sortDir*=-1}else{sortKey=key;sortDir=1}
+// ══════════════════════════════════════
+// GitHub Sync
+// ══════════════════════════════════════
+function setSyncBadge(type,text){
+  const b=document.getElementById('syncBadge');
+  b.className='sync-status sync-'+type;
+  b.textContent=text;
+}
+
+async function ghFetch(path,opts={}){
+  const res=await fetch(API_BASE+path,{
+    ...opts,
+    headers:{'Authorization':'token '+ghToken,'Accept':'application/vnd.github+json',...(opts.headers||{})}
+  });
+  return res;
+}
+
+async function loadRemote(){
+  setSyncBadge('ing','同步中...');
+  try{
+    const res=await ghFetch(`/repos/${REPO_OWNER}/${REPO_NAME}/contents/${DATA_FILE}`);
+    if(res.ok){
+      const data=await res.json();
+      fileSha=data.sha;
+      const content=JSON.parse(atob(data.content.replace(/\n/g,'')));
+      if(content.cards){state=content;localStorage.setItem('kanban_v4',JSON.stringify(state))}
+      setSyncBadge('ok','已同步');
+    }else if(res.status===404){
+      // File doesn't exist yet, create it
+      fileSha=null;
+      await saveRemote();
+    }else{
+      throw new Error('HTTP '+res.status);
+    }
+  }catch(e){
+    console.error('Load remote error:',e);
+    setSyncBadge('err','同步失败 ↻');
+    // Fall back to local
+    try{const r=localStorage.getItem('kanban_v4');if(r){const s=JSON.parse(r);if(s.cards)state=s}}catch(e2){}
+  }
   render();
 }
 
-function cmpCards(a,b){
-  if(!sortKey)return 0;
-  let va=a[sortKey]||'',vb=b[sortKey]||'';
-  if(sortKey==='priority'){va=PRI_ORDER[va]??1;vb=PRI_ORDER[vb]??1;return (va-vb)*sortDir}
-  if(sortKey==='status'){va=STATUS_ORDER[va]??0;vb=STATUS_ORDER[vb]??0;return (va-vb)*sortDir}
-  if(typeof va==='string')va=va.toLowerCase();
-  if(typeof vb==='string')vb=vb.toLowerCase();
-  if(va<vb)return -1*sortDir;
-  if(va>vb)return 1*sortDir;
-  return 0;
+async function saveRemote(){
+  setSyncBadge('ing','保存中...');
+  try{
+    const content=btoa(unescape(encodeURIComponent(JSON.stringify(state,null,2))));
+    const body={message:'update kanban data',content:content};
+    if(fileSha)body.sha=fileSha;
+    const res=await ghFetch(`/repos/${REPO_OWNER}/${REPO_NAME}/contents/${DATA_FILE}`,{
+      method:'PUT',
+      body:JSON.stringify(body)
+    });
+    if(res.ok){
+      const data=await res.json();
+      fileSha=data.content.sha;
+      setSyncBadge('ok','已同步');
+    }else{
+      const err=await res.json();
+      // SHA conflict - refetch and retry
+      if(res.status===409||(err.message&&err.message.includes('sha'))){
+        await loadRemote();
+        return;
+      }
+      throw new Error(err.message||'HTTP '+res.status);
+    }
+  }catch(e){
+    console.error('Save remote error:',e);
+    setSyncBadge('err','保存失败 ↻');
+  }
 }
 
-// ── Render ──
+function persist(){
+  localStorage.setItem('kanban_v4',JSON.stringify(state));
+  // Debounced remote save (1.5s after last change)
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(()=>saveRemote(),1500);
+}
+
+async function doSync(){
+  await loadRemote();
+  render();
+}
+
+// ══════════════════════════════════════
+// Setup
+// ══════════════════════════════════════
+async function finishSetup(){
+  const token=document.getElementById('setupToken').value.trim();
+  const errEl=document.getElementById('setupErr');
+  if(!token){errEl.textContent='请输入 Token';return}
+  errEl.textContent='验证中...';
+  try{
+    const res=await fetch(API_BASE+'/user',{headers:{'Authorization':'token '+token}});
+    if(!res.ok)throw new Error('Token 无效');
+    const user=await res.json();
+    if(user.login!==REPO_OWNER){errEl.textContent='该 Token 不属于 '+REPO_OWNER+' 账号';return}
+    localStorage.setItem('kanban_token',token);
+    ghToken=token;
+    errEl.textContent='';
+    showMainApp();
+  }catch(e){
+    errEl.textContent='验证失败：'+e.message;
+  }
+}
+
+function showMainApp(){
+  document.getElementById('setupScreen').style.display='none';
+  document.getElementById('mainApp').style.display='';
+  loadRemote();
+}
+
+function resetToken(){
+  if(confirm('确定要清除本设备的 Token 吗？')){
+    localStorage.removeItem('kanban_token');
+    location.reload();
+  }
+}
+
+// ══════════════════════════════════════
+// Init
+// ══════════════════════════════════════
+(function init(){
+  const saved=localStorage.getItem('kanban_token');
+  if(saved){
+    ghToken=saved;
+    showMainApp();
+  }else{
+    document.getElementById('setupScreen').style.display='';
+  }
+})();
+
+// ══════════════════════════════════════
+// Render
+// ══════════════════════════════════════
 function render(){
   const fp=document.getElementById('fProject').value;
   const fpr=document.getElementById('fPriority').value;
@@ -323,7 +469,6 @@ function render(){
     `;
     tbody.appendChild(tr);
 
-    // Detail expandable row
     if(isExpanded){
       const dtr=document.createElement('tr');
       dtr.className='detail-row';
@@ -336,9 +481,8 @@ function render(){
   });
 
   document.getElementById('emptyState').style.display=cards.length?'none':'';
-  document.querySelector('table').style.display=cards.length?'':'none';
+  document.querySelector('#mainApp table').style.display=cards.length?'':'none';
 
-  // stats
   const all=state.cards.length;
   const todo=state.cards.filter(c=>c.status==='todo').length;
   const prog=state.cards.filter(c=>c.status==='progress').length;
@@ -346,7 +490,6 @@ function render(){
   const od=state.cards.filter(c=>c.due&&c.due<todayStr()&&c.status!=='done').length;
   document.getElementById('stats').innerHTML=`全部 <b>${all}</b> | 待办 <b>${todo}</b> | 进行中 <b>${prog}</b> | 已完成 <b>${done}</b>${od?` | <span style="color:#e55">已过期 <b>${od}</b></span>`:''}`;
 
-  // sort indicators
   ['title','project','priority','status','due','owner'].forEach(k=>{
     const el=document.getElementById('s_'+k);
     if(el)el.textContent=sortKey===k?(sortDir===1?' ▲':' ▼'):'';
@@ -362,33 +505,27 @@ function syncProjectFilter(){
   PROJECTS.forEach(p=>{sel.innerHTML+=`<option value="${esc(p.name)}" ${prev===p.name?'selected':''}>${esc(p.name)}</option>`});
 }
 
-function addDays(dateStr,n){const d=new Date(dateStr);d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)}
-
-// ── Toggle done via checkbox ──
-function toggleDone(id,checked){
-  const c=state.cards.find(x=>x.id===id);
-  if(!c)return;
-  c.status=checked?'done':'todo';
-  persist();render();
+// ══════════════════════════════════════
+// Sort
+// ══════════════════════════════════════
+function sortBy(key){if(sortKey===key){sortDir*=-1}else{sortKey=key;sortDir=1}render()}
+function cmpCards(a,b){
+  if(!sortKey)return 0;
+  let va=a[sortKey]||'',vb=b[sortKey]||'';
+  if(sortKey==='priority'){va=PRI_ORDER[va]??1;vb=PRI_ORDER[vb]??1;return(va-vb)*sortDir}
+  if(sortKey==='status'){va=STATUS_ORDER[va]??0;vb=STATUS_ORDER[vb]??0;return(va-vb)*sortDir}
+  if(typeof va==='string')va=va.toLowerCase();
+  if(typeof vb==='string')vb=vb.toLowerCase();
+  if(va<vb)return -1*sortDir;if(va>vb)return 1*sortDir;return 0;
 }
 
-// ── Toggle detail expand ──
-function toggleDetail(id){
-  if(expandedIds.has(id)){expandedIds.delete(id)}else{expandedIds.add(id)}
-  render();
-}
+// ══════════════════════════════════════
+// Task operations
+// ══════════════════════════════════════
+function toggleDone(id,checked){const c=state.cards.find(x=>x.id===id);if(!c)return;c.status=checked?'done':'todo';persist();render()}
+function toggleDetail(id){if(expandedIds.has(id)){expandedIds.delete(id)}else{expandedIds.add(id)}render()}
+function cycleStatus(id){const c=state.cards.find(x=>x.id===id);if(!c)return;const o=['todo','progress','done'];c.status=o[(o.indexOf(c.status)+1)%3];persist();render()}
 
-// ── Cycle status on click ──
-function cycleStatus(id){
-  const c=state.cards.find(x=>x.id===id);
-  if(!c)return;
-  const order=['todo','progress','done'];
-  const i=order.indexOf(c.status);
-  c.status=order[(i+1)%order.length];
-  persist();render();
-}
-
-// ── Modal ──
 function openModal(){
   editingId=null;
   document.getElementById('mTitle').textContent='新建任务';
@@ -406,8 +543,7 @@ function openModal(){
 }
 
 function openEdit(id){
-  const c=state.cards.find(x=>x.id===id);
-  if(!c)return;
+  const c=state.cards.find(x=>x.id===id);if(!c)return;
   editingId=id;
   document.getElementById('mTitle').textContent='编辑任务';
   document.getElementById('mDelBtn').style.display='';
@@ -432,11 +568,7 @@ function renderChips(sel){
     ch.className='chip'+(sel===p.name?' selected':'');
     ch.style.background=p.color+'18';ch.style.color=p.color;
     ch.textContent=p.name;
-    ch.onclick=()=>{
-      const was=ch.classList.contains('selected');
-      g.querySelectorAll('.chip').forEach(c=>c.classList.remove('selected'));
-      if(!was)ch.classList.add('selected');
-    };
+    ch.onclick=()=>{const w=ch.classList.contains('selected');g.querySelectorAll('.chip').forEach(c=>c.classList.remove('selected'));if(!w)ch.classList.add('selected')};
     g.appendChild(ch);
   });
 }
@@ -463,20 +595,12 @@ function saveCard(){
   persist();closeModal();render();
 }
 
-function deleteEditing(){
-  if(editingId&&confirm('确定删除此任务？')){
-    state.cards=state.cards.filter(c=>c.id!==editingId);
-    persist();closeModal();render();
-  }
-}
-function delCard(id){
-  if(confirm('确定删除此任务？')){
-    state.cards=state.cards.filter(c=>c.id!==id);
-    persist();render();
-  }
-}
+function deleteEditing(){if(editingId&&confirm('确定删除此任务？')){state.cards=state.cards.filter(c=>c.id!==editingId);persist();closeModal();render()}}
+function delCard(id){if(confirm('确定删除此任务？')){state.cards=state.cards.filter(c=>c.id!==id);persist();render()}}
 
-// ── Import / Export ──
+// ══════════════════════════════════════
+// Import / Export
+// ══════════════════════════════════════
 function exportData(){
   const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
@@ -493,11 +617,11 @@ function importData(){
   input.click();
 }
 
-// ── Keyboard ──
+// Keyboard
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
 
-// ── Init ──
-render();
+// Auto-refresh from remote every 60s
+setInterval(()=>{if(ghToken)loadRemote()},60000);
 </script>
 </body>
 </html>
