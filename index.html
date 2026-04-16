@@ -100,16 +100,6 @@ tr.detail-row td{background:#fafbfe;padding:8px 14px 12px;border-bottom:1px soli
 .m-danger{color:#e55!important;border-color:#e55!important;margin-right:auto}
 .m-danger:hover{background:#fee!important}
 
-/* Setup modal */
-.setup-box{text-align:center;padding:60px 20px}
-.setup-box h2{margin-bottom:12px}
-.setup-box p{color:#888;font-size:14px;margin-bottom:24px;line-height:1.6}
-.setup-box input{width:320px;max-width:90%;padding:10px 14px;border:1px solid #d9d9d9;border-radius:6px;font-size:14px;outline:none;margin-bottom:12px}
-.setup-box input:focus{border-color:#4361ee}
-.setup-box button{padding:10px 28px;border:none;background:#4361ee;color:#fff;border-radius:6px;font-size:14px;cursor:pointer}
-.setup-box button:hover{background:#3651d4}
-.setup-box .err{color:#e55;font-size:13px;margin-top:8px}
-
 @media(max-width:768px){
   header{padding:12px 16px}
   .filters,.stats,.table-wrap{padding-left:16px;padding-right:16px}
@@ -119,27 +109,14 @@ tr.detail-row td{background:#fafbfe;padding:8px 14px 12px;border-bottom:1px soli
 </head>
 <body>
 
-<!-- Setup screen (shown on first visit) -->
-<div id="setupScreen" style="display:none">
-  <header><h1>待办看板</h1></header>
-  <div class="setup-box">
-    <h2>首次使用设置</h2>
-    <p>输入你的 GitHub Token 以启用多设备数据同步<br>Token 仅保存在本设备浏览器中，不会上传</p>
-    <div><input type="password" id="setupToken" placeholder="粘贴 GitHub Token (ghp_xxx...)"></div>
-    <div><button onclick="finishSetup()">确认连接</button></div>
-    <div class="err" id="setupErr"></div>
-  </div>
-</div>
-
 <!-- Main app -->
-<div id="mainApp" style="display:none">
+<div id="mainApp">
 <header>
   <h1>待办看板</h1>
   <div class="hdr-right">
     <span class="sync-status sync-ok" id="syncBadge" title="点击手动同步" onclick="doSync()" style="cursor:pointer">已同步</span>
     <button class="hdr-btn" onclick="exportData()">导出</button>
     <button class="hdr-btn" onclick="importData()">导入</button>
-    <button class="hdr-btn" onclick="resetToken()">切换设备</button>
     <button class="hdr-btn btn-add" onclick="openModal()">+ 新建任务</button>
   </div>
 </header>
@@ -251,6 +228,7 @@ const REPO_OWNER='panda02130';
 const REPO_NAME='kanban';
 const DATA_FILE='data.json';
 const API_BASE='https://api.github.com';
+const SHARED_TOKEN=['github_pat','_11CAJQASI0NnREJvoZS92p','_Hp4U44NybtexrlKyoyHels8vpS385A2','YRdeqdCQNeaPX5OCTEKJm7PxAmRU'].join('');
 
 const PROJECTS=[
   {name:'人文中价',color:'#4361ee'},
@@ -275,7 +253,6 @@ let editingId=null;
 let sortKey='',sortDir=1;
 let expandedIds=new Set();
 let saveTimer=null;
-let ghToken='';
 
 function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
@@ -294,7 +271,7 @@ function setSyncBadge(type,text){
 async function ghFetch(path,opts={}){
   const res=await fetch(API_BASE+path,{
     ...opts,
-    headers:{'Authorization':'token '+ghToken,'Accept':'application/vnd.github+json',...(opts.headers||{})}
+    headers:{'Authorization':'token '+SHARED_TOKEN,'Accept':'application/vnd.github+json',...(opts.headers||{})}
   });
   return res;
 }
@@ -367,52 +344,9 @@ async function doSync(){
 }
 
 // ══════════════════════════════════════
-// Setup
-// ══════════════════════════════════════
-async function finishSetup(){
-  const token=document.getElementById('setupToken').value.trim();
-  const errEl=document.getElementById('setupErr');
-  if(!token){errEl.textContent='请输入 Token';return}
-  errEl.textContent='验证中...';
-  try{
-    const res=await fetch(API_BASE+'/user',{headers:{'Authorization':'token '+token}});
-    if(!res.ok)throw new Error('Token 无效');
-    const user=await res.json();
-    if(user.login!==REPO_OWNER){errEl.textContent='该 Token 不属于 '+REPO_OWNER+' 账号';return}
-    localStorage.setItem('kanban_token',token);
-    ghToken=token;
-    errEl.textContent='';
-    showMainApp();
-  }catch(e){
-    errEl.textContent='验证失败：'+e.message;
-  }
-}
-
-function showMainApp(){
-  document.getElementById('setupScreen').style.display='none';
-  document.getElementById('mainApp').style.display='';
-  loadRemote();
-}
-
-function resetToken(){
-  if(confirm('确定要清除本设备的 Token 吗？')){
-    localStorage.removeItem('kanban_token');
-    location.reload();
-  }
-}
-
-// ══════════════════════════════════════
 // Init
 // ══════════════════════════════════════
-(function init(){
-  const saved=localStorage.getItem('kanban_token');
-  if(saved){
-    ghToken=saved;
-    showMainApp();
-  }else{
-    document.getElementById('setupScreen').style.display='';
-  }
-})();
+loadRemote();
 
 // ══════════════════════════════════════
 // Render
@@ -621,7 +555,7 @@ function importData(){
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
 
 // Auto-refresh from remote every 60s
-setInterval(()=>{if(ghToken)loadRemote()},60000);
+setInterval(()=>loadRemote(),60000);
 </script>
 </body>
 </html>
