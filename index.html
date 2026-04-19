@@ -2093,6 +2093,12 @@ function switchProduct(pid) {
 }
 
 function renderAll() {
+  try { _renderAllInner(); } catch(e) {
+    document.getElementById('mainContent').innerHTML = `<div style="color:red;padding:40px"><h2>看板渲染错误</h2><pre>${e.message}\n${e.stack}</pre></div>`;
+    console.error('renderAll error:', e);
+  }
+}
+function _renderAllInner() {
   const f = parseInt(document.getElementById('selPeriod').value);
   const wk = document.getElementById('selWeek').value;
   const ch = document.getElementById('selChannel').value;
@@ -2134,8 +2140,13 @@ function renderAll() {
     const snapDateInfo = snapCur ? ` | <span style="color:var(--pri)">周次快照：截止${snapCur['截止日']}</span>` : '';
     const scope = `<div class="scope-box"><b>数据口径：</b>${KOUJI}${chLabel}${snapDateInfo}<br><b>对比口径：</b>${SEASON}${f} ${wk} vs ${compareLabel} 同周期数据（截至 ${CURRENT_DATE.slice(0,4)}-${CURRENT_DATE.slice(4,6)}-${CURRENT_DATE.slice(6)}）</div>`;
     let content;
-    if(t.id==='tab7') content = t.buildFn();
-    else content = t.buildFn(String(f), cp.map(String), ch, wk);
+    try {
+      if(t.id==='tab7') content = t.buildFn();
+      else content = t.buildFn(String(f), cp.map(String), ch, wk);
+    } catch(e) {
+      content = `<div style="color:red;padding:20px;background:#fff3f3;border:1px solid red;margin:10px;border-radius:5px"><b>渲染错误 [${t.id}]:</b> ${e.message}<br><pre style="font-size:11px;margin-top:8px">${e.stack}</pre></div>`;
+      console.error('Tab render error:', t.id, e);
+    }
     panels += `<div class="panel${isShow?' show':''}" id="${t.id}"><div class="panel-head"><h2>${t.title}</h2><span class="badge">${SEASON}${f} ${wk}</span></div>${scope}${content}</div>`;
   });
   document.getElementById('mainContent').innerHTML = panels;
