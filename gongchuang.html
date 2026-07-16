@@ -1,0 +1,1542 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>三中价春1-5期共创复盘看板</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'PingFang SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f5f7fa;
+            color: #333;
+            display: flex;
+            min-height: 100vh;
+        }
+        /* Sidebar */
+        .sidebar {
+            width: 240px;
+            background: #1a1a2e;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        .sidebar-header {
+            padding: 24px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .sidebar-header h1 {
+            color: #fff;
+            font-size: 18px;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+        .sidebar-header p {
+            color: rgba(255,255,255,0.5);
+            font-size: 12px;
+            margin-top: 6px;
+        }
+        .nav-list {
+            list-style: none;
+            padding: 12px 0;
+            flex: 1;
+        }
+        .nav-list li {
+            padding: 12px 20px;
+            cursor: pointer;
+            color: rgba(255,255,255,0.65);
+            font-size: 14px;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .nav-list li:hover {
+            background: rgba(255,255,255,0.05);
+            color: rgba(255,255,255,0.9);
+        }
+        .nav-list li.active {
+            background: rgba(255,255,255,0.08);
+            color: #fff;
+            border-left-color: #4A90D9;
+        }
+        .nav-list li .nav-icon {
+            width: 20px;
+            text-align: center;
+            font-size: 16px;
+        }
+        .sidebar-footer {
+            padding: 16px 20px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.4);
+            font-size: 11px;
+        }
+        /* Main Content */
+        .main-content {
+            margin-left: 240px;
+            flex: 1;
+            padding: 32px;
+            max-width: 1400px;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        /* Cards */
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a1a2e;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .card-title .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        .dot-jianqiao { background: #4A90D9; }
+        .dot-renwen { background: #67C23A; }
+        .dot-siwei { background: #E6A23C; }
+        /* KPI Cards */
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+        .kpi-card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+            padding: 20px 24px;
+            position: relative;
+            overflow: hidden;
+        }
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+        }
+        .kpi-card.jianqiao::before { background: #4A90D9; }
+        .kpi-card.renwen::before { background: #67C23A; }
+        .kpi-card.siwei::before { background: #E6A23C; }
+        .kpi-label {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        .kpi-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+        .kpi-sub {
+            font-size: 12px;
+            color: #999;
+            margin-top: 4px;
+        }
+        /* Chart Container */
+        .chart-container {
+            width: 100%;
+            height: 360px;
+        }
+        .chart-container-sm {
+            width: 100%;
+            height: 280px;
+        }
+        .chart-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+        /* Tables */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .data-table th {
+            background: #f8f9fc;
+            padding: 10px 12px;
+            text-align: center;
+            font-weight: 600;
+            color: #555;
+            border-bottom: 2px solid #e8e8e8;
+        }
+        .data-table td {
+            padding: 10px 12px;
+            text-align: center;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .data-table tr:nth-child(even) {
+            background: #fafbfd;
+        }
+        .data-table tr:hover {
+            background: #f0f4ff;
+        }
+        /* Heat colors */
+        .heat-good { background: rgba(103, 194, 58, 0.15); color: #529b2e; }
+        .heat-mid { background: rgba(230, 162, 60, 0.15); color: #b88230; }
+        .heat-bad { background: rgba(245, 108, 108, 0.15); color: #c45656; }
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 14px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #e0e0e0;
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 32px;
+        }
+        .timeline-dot {
+            position: absolute;
+            left: -22px;
+            top: 6px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #4A90D9;
+            border: 3px solid #fff;
+            box-shadow: 0 0 0 2px #4A90D9;
+        }
+        .timeline-period {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 12px;
+        }
+        .timeline-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+        .timeline-card {
+            border-radius: 10px;
+            padding: 16px;
+            border: 1px solid #e8e8e8;
+        }
+        .timeline-card.jianqiao { border-left: 4px solid #4A90D9; }
+        .timeline-card.renwen { border-left: 4px solid #67C23A; }
+        .timeline-card.siwei { border-left: 4px solid #E6A23C; }
+        .timeline-card h4 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .timeline-card .metrics {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+        .timeline-card .event {
+            font-size: 12px;
+            color: #4A90D9;
+            line-height: 1.5;
+            margin-bottom: 4px;
+        }
+        .timeline-card .insight {
+            font-size: 12px;
+            color: #E6A23C;
+            line-height: 1.5;
+            font-style: italic;
+        }
+        /* Buttons */
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .btn {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #fff;
+            cursor: pointer;
+            font-size: 13px;
+            color: #666;
+            transition: all 0.2s;
+        }
+        .btn:hover {
+            border-color: #4A90D9;
+            color: #4A90D9;
+        }
+        .btn.active {
+            background: #4A90D9;
+            color: #fff;
+            border-color: #4A90D9;
+        }
+        /* Insight Box */
+        .insight-box {
+            background: #f8f9fc;
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin-top: 16px;
+            border-left: 4px solid #4A90D9;
+        }
+        .summary-box {
+            background: linear-gradient(135deg, #f0f4ff 0%, #fafbff 100%);
+            border: 1px solid #d4e3f7;
+            border-left: 5px solid #4A90D9;
+            padding: 20px 24px;
+            margin-top: 24px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(74,144,217,0.08);
+        }
+        .summary-box h4 {
+            font-size: 15px;
+            color: #1a1a2e;
+            margin-bottom: 12px;
+        }
+        .insight-box h4 {
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        .insight-box p, .insight-box li {
+            font-size: 13px;
+            color: #555;
+            line-height: 1.8;
+        }
+        .insight-box ul {
+            padding-left: 16px;
+        }
+        /* Waterfall / Strategy */
+        .strategy-card {
+            background: linear-gradient(135deg, #f8f9fc, #fff);
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 16px;
+            border: 1px solid #e8e8e8;
+        }
+        .strategy-card h3 {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1a1a2e;
+            margin-bottom: 12px;
+        }
+        .strategy-card .item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px dashed #eee;
+            font-size: 13px;
+        }
+        .strategy-card .item:last-child {
+            border-bottom: none;
+        }
+        .target-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            margin-top: 16px;
+        }
+        .target-table th {
+            background: #1a1a2e;
+            color: #fff;
+            padding: 12px;
+            text-align: center;
+        }
+        .target-table td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+        .badge-jianqiao { background: rgba(74,144,217,0.1); color: #4A90D9; }
+        .badge-renwen { background: rgba(103,194,58,0.1); color: #67C23A; }
+        .badge-siwei { background: rgba(230,162,60,0.1); color: #E6A23C; }
+        /* Section Title */
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .timeline-cards {
+                grid-template-columns: 1fr;
+            }
+            .chart-row {
+                grid-template-columns: 1fr;
+            }
+            .kpi-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <h1>三中价共创复盘</h1>
+            <p>春1-5期数据看板 v2</p>
+        </div>
+        <ul class="nav-list">
+            <li class="active" onclick="switchTab(0)"><span class="nav-icon">📊</span>总览仪表盘</li>
+            <li onclick="switchTab(1)"><span class="nav-icon">📅</span>期次大事记</li>
+            <li onclick="switchTab(2)"><span class="nav-icon">🔄</span>转化漏斗</li>
+            <li onclick="switchTab(3)"><span class="nav-icon">📈</span>结构变量&画像</li>
+            <li onclick="switchTab(4)"><span class="nav-icon">⭐</span>满意度&服务</li>
+            <li onclick="switchTab(5)"><span class="nav-icon">🎯</span>5pp路径&暑秋</li>
+        </ul>
+        <div class="sidebar-footer">
+            数据来源：MARIO + 项目复盘<br>
+            生成时间：2026-05-25
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Tab 1: 总览仪表盘 -->
+        <div class="tab-content active" id="tab-0">
+            <h2 class="section-title">总览仪表盘</h2>
+            <div class="kpi-row">
+                <div class="kpi-card jianqiao">
+                    <div class="kpi-label">剑桥 春1-5累计量级</div>
+                    <div class="kpi-value">59,532</div>
+                    <div class="kpi-sub">均转率 19.07% | 均ROI 0.79</div>
+                </div>
+                <div class="kpi-card renwen">
+                    <div class="kpi-label">人文 春1-4累计量级</div>
+                    <div class="kpi-value">19,452</div>
+                    <div class="kpi-sub">均转率 18.84% | 均ROI 0.67</div>
+                </div>
+                <div class="kpi-card siwei">
+                    <div class="kpi-label">思维 春1-4累计量级</div>
+                    <div class="kpi-value">46,329</div>
+                    <div class="kpi-sub">均转率 19.50% | 均ROI 0.74</div>
+                </div>
+            </div>
+            <div class="chart-row">
+                <div class="card">
+                    <div class="card-title">转率趋势（春1-5）</div>
+                    <div class="chart-container" id="chart-overview-rate"></div>
+                </div>
+                <div class="card">
+                    <div class="card-title">量级趋势（春1-5）</div>
+                    <div class="chart-container" id="chart-overview-volume"></div>
+                </div>
+            </div>
+            <div class="chart-row">
+                <div class="card">
+                    <div class="card-title">ROI趋势（春1-5）</div>
+                    <div class="chart-container" id="chart-overview-roi"></div>
+                </div>
+                <div class="card">
+                    <div class="card-title">人效趋势（春1-5）</div>
+                    <div class="chart-container" id="chart-overview-efficiency"></div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">正价课退费率对比（续报正价课后退费，三项目可比）</div>
+                <table class="data-table">
+                    <thead>
+                        <tr><th>项目</th><th>春1</th><th>春2</th><th>春3</th><th>春4</th><th>春5</th><th>趋势</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="badge badge-siwei">思维</span></td>
+                            <td>9.36%</td><td>7.27%</td><td>6.69%</td><td>4.84%</td><td>—</td>
+                            <td class="heat-good">持续下降 ↓</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-jianqiao">剑桥</span></td>
+                            <td>4.85%</td><td class="heat-bad">12.39%</td><td>7.03%</td><td>3.38%</td><td>—</td>
+                            <td>春2异常高后回落</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-renwen">人文</span></td>
+                            <td>3.54%</td><td>4.67%</td><td>4.42%</td><td>1.30%</td><td>—</td>
+                            <td class="heat-good">持续下降 ↓</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="insight-box" style="margin-top:12px;">
+                    <p><strong>口径说明：</strong>退费率 = 已续报正价课的用户后续又退费的比率。三项目整体退费率均呈改善趋势，思维从9.36%→4.84%，人文从3.54%→1.30%。剑桥春2异常（12.39%），可能与春2开始分级别售卖后用户预期不匹配有关。</p>
+                </div>
+            </div>
+            <div class="insight-box summary-box">
+                <h4>📊 总览对比结论</h4>
+                <table class="data-table" style="margin-top:12px;">
+                    <thead><tr><th>维度</th><th style="color:#4A90D9">剑桥</th><th style="color:#67C23A">人文</th><th style="color:#E6A23C">思维</th></tr></thead>
+                    <tbody>
+                        <tr><td>转率趋势</td><td class="heat-good">稳中有升 17.37%→19.99%</td><td class="heat-good">持续上升 16.9%→19.87%</td><td class="heat-bad">断崖下滑 23.2%→16.1%(-7pp)</td></tr>
+                        <tr><td>量级趋势</td><td>缩量经营 15075→10961</td><td class="heat-bad">断崖萎缩 7011→2692(-62%)</td><td>先稳后涨 10572→14893(+41%)</td></tr>
+                        <tr><td>ROI</td><td class="heat-good">最优 0.73→0.78</td><td class="heat-bad">最低 0.73→0.65(成本侧恶化)</td><td>稳定 0.72维持</td></tr>
+                        <tr><td>人效</td><td>稳定 79→69</td><td class="heat-bad">极端低 80→42(测试)</td><td>逐期下降 95→83</td></tr>
+                    </tbody>
+                </table>
+                <div style="margin-top:12px;font-size:13px;line-height:1.8;">
+                    <p><strong>思维转率下滑原因（-7pp）：</strong>①退盒用户占比从3.66%飙升至27%（退盒=退导流课实物，退盒转率<6%直接稀释整体）②渠道合作用户占比春3=10%→春4=19%（转率仅10%，远低于直播间用户）③发布会到课率断崖至50.67%（↓18pp）④空置期延长+量级暴涨导致人效覆盖不足</p>
+                    <p><strong>人文量级断崖原因（-62%）：</strong>①外部投放逐期缩量（非停止），内部导流占比从6%升至40%但总量减少②招生难度逐期加大，外部渠道ROI走低（进班成本从735升至1152）③用户池收窄后高转化渠道（外部投放）占比持续下降</p>
+                    <p><strong>剑桥为何三项目最稳：</strong>①定金链路+培训体系缩小团队方差②罗西主讲换人带来持续增量（直出6.04%→10.86%）③淡季空置期敏感度低（用户需求平稳）</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 2: 期次大事记 -->
+        <div class="tab-content" id="tab-1">
+            <h2 class="section-title">期次大事记</h2>
+            <div class="timeline">
+                <!-- 春1 -->
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-period">春1</div>
+                    <div class="timeline-cards">
+                        <div class="timeline-card siwei">
+                            <h4><span class="badge badge-siwei">思维</span> 10572人 | 23.2% | ROI 0.72</h4>
+                            <div class="metrics">人效95 | 退费9.36% | 定金率28.3% | 空置19.6天<br>奥数7695人(人头率26.0%) | 199品2884人(人头率15.6%)</div>
+                            <div class="event">▪ 转品节点调整：1-5年级k2+暑，6年级单科k2(1420元)<br>▪ 春1期W4转化（寒3期为W3），节奏后移一周<br>▪ 盒子用户占比92.88%（结构健康期）</div>
+                            <div class="insight">认知：6年级低客单转率27.68%（同比+26.61%），低价格门槛验证有效</div>
+                        </div>
+                        <div class="timeline-card jianqiao">
+                            <h4><span class="badge badge-jianqiao">剑桥</span> 15075人 | 17.37% | ROI 0.73</h4>
+                            <div class="metrics">人效79 | 团队191人 | 进班成本735 | 退款占比38%<br>排IP转率16.70% | 直出定金率6.04% | 纯直播间排退23.16%</div>
+                            <div class="event">▪ 首日交定金跟进有效：定金转化+7.64pp，一轮+4.23pp，二轮+3.03pp<br>▪ 高年级转率低于低年级(结构性)，需围绕「效果性价比」做包装<br>▪ 空置期0-7天占比-20pp，开始向8-21天偏移</div>
+                            <div class="insight">认知：交定金后及时跟进是高杠杆动作；空置期成为核心变量</div>
+                        </div>
+                        <div class="timeline-card renwen">
+                            <h4><span class="badge badge-renwen">人文</span> 7011人 | 16.9% | ROI 0.73</h4>
+                            <div class="metrics">人效80 | 团队87人 | 退费3.54% | 定金率12.79%<br>首到课81.19% | 答疑率62.59% | 满意度提交35.73%</div>
+                            <div class="event">▪ 后转产品为单春插班2讲(2880元)，涉及3周回放售卖<br>▪ W4接W3无W0，囤量3周，空置期78%>3周<br>▪ 课前通时环比下降71%，覆盖率断层</div>
+                            <div class="insight">认知：空置期拉长+回放售卖+无W0三者叠加是春1转率下降核心原因</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 春2 -->
+                <div class="timeline-item">
+                    <div class="timeline-dot" style="background:#67C23A; box-shadow:0 0 0 2px #67C23A;"></div>
+                    <div class="timeline-period">春2</div>
+                    <div class="timeline-cards">
+                        <div class="timeline-card siwei">
+                            <h4><span class="badge badge-siwei">思维</span> 10230人 | 19.4% | ROI 0.80</h4>
+                            <div class="metrics">人效92→107(实测) | 退费7.27% | 定金率24.6%(↓3.6pp) | 空置12.9天<br>奥数8229人(人头率20.77%) | 199品2012人(人头率13.7%↓12%)</div>
+                            <div class="event">▪ 退盒占比激增：3.66%→17.69%(↑14pp)，退盒转率仅4.45%<br>▪ 6年级首期售卖k2+加购包1919元，武汉团队首期承接不熟悉，转率-5pp<br>▪ 199取消定金机制：w3发布会后无定金直接转化，链路无明显收益→199品停投</div>
+                            <div class="insight">认知：高人效(107)+长空置叠加时，V1覆盖率是首要影响变量；定金是对冲人效上升的护城河</div>
+                        </div>
+                        <div class="timeline-card jianqiao">
+                            <h4><span class="badge badge-jianqiao">剑桥</span> 11947人 | 19.26% | ROI 0.81</h4>
+                            <div class="metrics">人效79 | 团队151人 | 进班成本676 | 退款占比38%<br>排IP转率18.30% | 直出定金率8.15%(+2.11pp) | 纯直播间24.27%</div>
+                            <div class="event">▪ 更换罗西主讲正向收益明确：直出+2.11pp，班课3最高+5.94pp<br>▪ 营销节奏前置(定金链接从40min提前到20min)：发布会直出+2.11pp，定金率+2.33pp<br>▪ 新老方差控制良好：差距均在10%以内，培训体系(先培→演练→总结→实战→解顾虑)</div>
+                            <div class="insight">认知：罗西主讲更有感染力（尤其全能3收益最大）；定金率目标28-30%</div>
+                        </div>
+                        <div class="timeline-card renwen">
+                            <h4><span class="badge badge-renwen">人文</span> 5623人 | 19.3% | ROI 0.68</h4>
+                            <div class="metrics">人效72 | 团队78人 | 退费4.67%<br>课前5min覆盖3年级72.88%(+15pp) | 导流占比21%(↑15pp) | 在读用户+20pp</div>
+                            <div class="event">▪ 恢复W0前置服务：课前通时+120%，覆盖率+20-30pp，一轮成功率+6.81pp<br>▪ 后转产品切品K2+暑(2880元)，消除回放售卖干扰<br>▪ 虚拟链路全面优于实物；定金策略放大，贡献占转化的46%<br>▪ 99阅写复播(1203人，ROI 0.83)</div>
+                            <div class="insight">认知：W0恢复是春2转率跃升+4pp的第一驱动力；首次沟通质量比次数更重要(一轮+6.81pp)</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 春3 -->
+                <div class="timeline-item">
+                    <div class="timeline-dot" style="background:#E6A23C; box-shadow:0 0 0 2px #E6A23C;"></div>
+                    <div class="timeline-period">春3</div>
+                    <div class="timeline-cards">
+                        <div class="timeline-card siwei">
+                            <h4><span class="badge badge-siwei">思维</span> 10641人 | 19.3% | ROI 0.72</h4>
+                            <div class="metrics">人效90 | 退费6.69% | 定金率23.4%(↓1.3pp) | 空置18.1天(新高)<br>定金人头率60.57% | 渠道合作占比10% | V1覆盖40.5%(+8pp)</div>
+                            <div class="event">▪ 商务渠道大规模进入：累计9%，到课折损9.39%远高于奥数(5%)，首次形成系统性拖累<br>▪ 空置期均值创新高：春2 12.9天→春3 18.1天，节后爆量进班导致高年级与流量池撞课率8-10%<br>▪ 高低人效测试沉淀：首先选择的小组能力有方差，需选能力相近小组；春3服务期无加班安排，覆盖低</div>
+                            <div class="insight">认知：商务用户画像与奥数根本不同（购买力下降、到课折损偏高、失联率高）；需精准分层(购买力+教育意识双维打分)</div>
+                        </div>
+                        <div class="timeline-card jianqiao">
+                            <h4><span class="badge badge-jianqiao">剑桥</span> 11596人 | 19.64% | ROI 0.83</h4>
+                            <div class="metrics">人效78 | 团队148人 | 进班成本667 | 退款占比40.60%<br>排IP转率18.38% | 直出定金率8.70% | 纯直播间25.16%</div>
+                            <div class="event">▪ 空置期对不同年级影响差异化：67.25%的leads集中在15-21天(vs春1的45.01%)，班课5受影响最大(15-21天占比+69pp)<br>▪ 班课3(3年级)存在季节性需求波动：满意度5分比例-20pp(所有班课中最高)，但春4期W1恢复正常<br>▪ 希望之星不是核心转化杠杆：高到课参赛vs高到课未参赛转率差距小</div>
+                            <div class="insight">认知：班课5低年级用户紧迫度低，空置期影响远大于低年级；3年级开学第一月配合度天然低</div>
+                        </div>
+                        <div class="timeline-card renwen">
+                            <h4><span class="badge badge-renwen">人文</span> 4126人 | 19.3% | ROI 0.60</h4>
+                            <div class="metrics">人效70 | 团队59人 | 退费4.42% | 进班成本1152(+58%)<br>满意度提交49.73%(+16.92pp) | 发布会到课42.96%(+6.68pp) | 导流占比32%</div>
+                            <div class="event">▪ 满意度链路重大调整成功：提交率从32.81%跃升至49.73%(+16.92pp)，会报名占比+5.6pp<br>▪ 会报名用户转率44%(是"再想想"25%的1.8倍)——提升会报名占比是下一步方向<br>▪ 进班成本暴增至1152(+58%)，ROI 0.60为历史最低；5年级转率达峰22.19%(历史最高)<br>▪ 清明假期W2到课断崖-12.7%，W3覆盖补偿反弹+1.3%</div>
+                            <div class="insight">认知：满意度链路是春3最大增量贡献(约+2pp)且可复制性最强；ROI=0.60是成本端(1152)问题非转率端(可比24.88%历史新高)</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 春4 -->
+                <div class="timeline-item">
+                    <div class="timeline-dot" style="background:#f56c6c; box-shadow:0 0 0 2px #f56c6c;"></div>
+                    <div class="timeline-period">春4</div>
+                    <div class="timeline-cards">
+                        <div class="timeline-card siwei">
+                            <h4><span class="badge badge-siwei">思维</span> 14893人 | 16.1% | ROI 0.72</h4>
+                            <div class="metrics">人效83 | 退费4.84% | 定金率15.6% | 退盒占比27%</div>
+                            <div class="event">▪ 退盒占比攀升至27%，发布会到课率断崖50.67%(↓18pp)<br>▪ 量级暴涨至14893人(+40%)，空置期21天+累计71%<br>▪ 商务占比+9pp，管理层带班与大盘差距2.15pp</div>
+                            <div class="insight">认知：服务驱动转化在下沉用户失效，发布会到课率是转化上限可控杠杆</div>
+                        </div>
+                        <div class="timeline-card jianqiao">
+                            <h4><span class="badge badge-jianqiao">剑桥</span> 9953人 | 19.11% | ROI 0.79</h4>
+                            <div class="metrics">人效76 | 团队131人 | 进班成本667</div>
+                            <div class="event">淡季空置期敏感度低(60%+在21-28天但转率不降反增)，小低及时反馈+2.79pp</div>
+                            <div class="insight">认知：班课2 w3发布会测试有效，IP转率18.38%</div>
+                        </div>
+                        <div class="timeline-card renwen">
+                            <h4><span class="badge badge-renwen">人文</span> 2692人 | 19.87% | ROI 0.65</h4>
+                            <div class="metrics">人效42 | 团队64人 | 退费1.30%</div>
+                            <div class="event">低人效42极限测试(系统班人效29转率21.37%领先人效56的4.39pp)</div>
+                            <div class="insight">认知：课前激活全面突破，答疑率72.73%新高</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 春5 -->
+                <div class="timeline-item">
+                    <div class="timeline-dot" style="background:#9b59b6; box-shadow:0 0 0 2px #9b59b6;"></div>
+                    <div class="timeline-period">春5</div>
+                    <div class="timeline-cards">
+                        <div class="timeline-card siwei" style="opacity:0.5;">
+                            <h4><span class="badge badge-siwei">思维</span> 暂无春5数据</h4>
+                            <div class="metrics">-</div>
+                        </div>
+                        <div class="timeline-card jianqiao">
+                            <h4><span class="badge badge-jianqiao">剑桥</span> 10961人 | 19.99% | ROI 0.78</h4>
+                            <div class="metrics">人效69 | 团队158人 | 进班成本649</div>
+                            <div class="event">▪ 269涨价测试：转率差来自空置期非价格本身<br>▪ 商务7.34%初步验证，新增量来源<br>▪ 214学习规划有促进，定金率38.2%历史新高</div>
+                            <div class="insight">认知：IP转率19.59%，纯直播间排退转28.13%，核心指标全面新高</div>
+                        </div>
+                        <div class="timeline-card renwen" style="opacity:0.5;">
+                            <h4><span class="badge badge-renwen">人文</span> 暂无春5数据</h4>
+                            <div class="metrics">-</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="insight-box summary-box">
+                <h4>📅 大事记跨期结论</h4>
+                <div style="font-size:13px;line-height:1.8;margin-top:8px;">
+                    <p><strong>三业务共同规律：</strong>春1是起点定调期（剑桥定金跟进验证、思维客单验证、人文暴露空置问题），春2是快速修正期（三业务均有重大调整），春3是新变量冲击期（商务/空置/成本），春4是分化定型期（剑桥稳、思维崩、人文精）</p>
+                    <p><strong>思维逐期恶化路径：</strong>春1转品节点调整（23.2%峰值）→春2退盒激增至17.69%（-3.8pp）→春3渠道合作引入(10%)+空置新高18.1天（-0.1pp）→春4退盒27%+发布会断崖+量级暴涨至14893人（-3.2pp）。核心：结构性变量叠加，单一杠杆难以扭转。</p>
+                    <p><strong>剑桥持续改善路径：</strong>春1定金跟进验证→春2换罗西主讲（+2.11pp）→春3空置期分级管理→春4淡季验证韧性→春5涨价+商务探索。核心：每期有明确的"已验证→落地→迭代"闭环。</p>
+                    <p><strong>人文V型修复后收缩：</strong>春1三重问题暴露→春2恢复W0大幅修复（+2.4pp）→春3满意度杠杆验证→春4极限人效测试。核心：产品力提升已到位，但量级萎缩是外部投放收缩的结果，非产品力问题。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 3: 转化漏斗 -->
+        <div class="tab-content" id="tab-2">
+            <h2 class="section-title">转化漏斗</h2>
+            <div class="card">
+                <div class="card-title">核心转化指标趋势对比（三项目×逐期）</div>
+                <div class="chart-row">
+                    <div class="chart-container" id="chart-funnel-headrate"></div>
+                    <div class="chart-container" id="chart-funnel-dingjin"></div>
+                </div>
+                <div class="chart-row" style="margin-top:24px;">
+                    <div class="chart-container" id="chart-funnel-daoke"></div>
+                    <div class="chart-container" id="chart-funnel-dayi"></div>
+                </div>
+            </div>
+            <div class="summary-box">
+                <h4>转化漏斗总结</h4>
+                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-top:12px;">
+                    <div style="border-left:3px solid #E6A23C; padding-left:12px;">
+                        <strong style="color:#E6A23C">思维：全链路逐期恶化</strong>
+                        <ul style="margin-top:6px; font-size:13px;">
+                            <li>加微率4期降9.6pp（97.6%→88.0%），摸底测率降16pp（88.8%→72.8%）</li>
+                            <li>到课率从92.2%断崖至73.6%（春3引入退盒用户拉低均值）</li>
+                            <li>定金率从28.3%降至15.6%（-12.7pp），人头转率从26.0%降至16.1%</li>
+                            <li><strong>原因：</strong>①退盒占比从3.7%飙升至27%，退盒转率<6%严重稀释；②人效从98降至83，服务精力分散；③空置期延长导致课前激活困难</li>
+                        </ul>
+                    </div>
+                    <div style="border-left:3px solid #4A90D9; padding-left:12px;">
+                        <strong style="color:#4A90D9">剑桥：全链路持续向好</strong>
+                        <ul style="margin-top:6px; font-size:13px;">
+                            <li>人头转率5期提升9.1pp（23.6%→32.7%），连续5期正增长</li>
+                            <li>定金率从27.6%提至38.2%（+10.6pp），发布会直出从6.04%提至10.86%</li>
+                            <li>到课率始终稳定在93-95%区间（课程粘性高）</li>
+                            <li><strong>原因：</strong>①罗西主讲更换后发布会直出+2.11pp；②定金链接前置+首日跟进策略持续优化；③人效从50降至33，服务密度反而提升</li>
+                        </ul>
+                    </div>
+                    <div style="border-left:3px solid #67C23A; padding-left:12px;">
+                        <strong style="color:#67C23A">人文：到课稳定但定金波动大</strong>
+                        <ul style="margin-top:6px; font-size:13px;">
+                            <li>到课率4期稳定在91-94%区间，答疑率从63.9%提升至72.0%（春4最高）</li>
+                            <li>人头转率稳步小幅增长（16.9%→19.9%，+3pp），但定金率春4骤降（14.6%→8.5%）</li>
+                            <li>满意度提交率春3跳升至49.4%（vs春1的33%），成为核心转化杠杆</li>
+                            <li><strong>原因：</strong>①春4量级仅2699人（较春1缩减61%），用户池收窄结构变化；②春4发布会到课率降至37.9%，定金转化入口缩窄；③课后5min持续提升说明课中激活有效</li>
+                        </ul>
+                    </div>
+                </div>
+                <div style="margin-top:16px; padding:12px; background:#f0f4ff; border-radius:8px;">
+                    <strong>跨项目核心差异：</strong>剑桥以「到课稳定×发布会直出」驱动，5期ROI稳中向好（0.79→0.81）；思维以「加微→摸底测→到课」为主链路但逐期衰减，退盒稀释是最大结构性变量；人文以「满意度×答疑」为核心杠杆，春3改版后杠杆强化但量级收缩限制增量空间。
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 4: 分期变量 & 用户画像（合并） -->
+        <div class="tab-content" id="tab-3">
+            <h2 class="section-title">结构变量 & 用户画像</h2>
+
+            <!-- 退盒/退款专题 -->
+            <div class="card" style="border: 2px solid #f0ad4e;">
+                <div class="card-title" style="font-size:16px;">导流课退盒/退款——最大结构性变量</div>
+                <p style="color:#666;font-size:13px;margin-bottom:16px;">口径：退盒/退款 = 用户退了导流课商品（思维退实物盒子、剑桥退双优品），但保留体验课资格后仍参与转化。</p>
+                <div class="chart-row">
+                    <div class="chart-container" id="chart-var-refund"></div>
+                    <div class="chart-container" id="chart-portrait-jianqiao-refund"></div>
+                </div>
+                <table class="data-table" style="margin-top:16px;">
+                    <thead>
+                        <tr>
+                            <th rowspan="2">指标</th>
+                            <th colspan="4" style="color:#E6A23C">思维（退盒 vs 未退盒）</th>
+                            <th colspan="5" style="color:#4A90D9">剑桥（退款 vs 未退款）</th>
+                        </tr>
+                        <tr>
+                            <th>春1</th><th>春2</th><th>春3</th><th>春4</th>
+                            <th>春1</th><th>春2</th><th>春3</th><th>春4</th><th>春5</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>退盒/退款占比</strong></td>
+                            <td>3.7%</td><td>17.7%</td><td>20.0%</td><td class="heat-bad">27.0%</td>
+                            <td>38%</td><td>38%</td><td>40.6%</td><td>44.2%</td><td class="heat-bad">45.6%</td>
+                        </tr>
+                        <tr>
+                            <td><strong>退盒/退款用户转率</strong></td>
+                            <td class="heat-bad">4.85%</td><td class="heat-bad">4.00%</td><td class="heat-bad">4.25%</td><td class="heat-bad">4.88%</td>
+                            <td class="heat-bad">6.43%</td><td class="heat-bad">7.27%</td><td class="heat-bad">7.22%</td><td class="heat-bad">7.57%</td><td class="heat-bad">7.48%</td>
+                        </tr>
+                        <tr>
+                            <td><strong>未退盒/未退款转率</strong></td>
+                            <td class="heat-good">22.50%</td><td class="heat-good">21.20%</td><td class="heat-good">21.51%</td><td>17.20%</td>
+                            <td class="heat-good">23.62%</td><td class="heat-good">27.62%</td><td class="heat-good">28.43%</td><td class="heat-good">28.68%</td><td class="heat-good">32.69%</td>
+                        </tr>
+                        <tr>
+                            <td><strong>两群体转率差值</strong></td>
+                            <td>17.7pp</td><td>17.2pp</td><td>17.3pp</td><td>12.3pp</td>
+                            <td>17.2pp</td><td>20.4pp</td><td>21.2pp</td><td>21.1pp</td><td>25.2pp</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <!-- 退款用户过程数据 -->
+                <div class="card-title" style="margin-top:20px;font-size:14px;">剑桥退款用户过程数据（转化杠杆定位）</div>
+                <table class="data-table" style="margin-top:8px;">
+                    <thead>
+                        <tr><th>退款用户过程指标</th><th>春1</th><th>春2</th><th>春3</th><th>春4</th><th>春5</th><th>vs 未退款差距</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>到课率</strong></td>
+                            <td class="heat-bad">46.32%</td><td>52.84%</td><td>47.26%</td><td>44.14%</td><td>43.77%</td>
+                            <td class="heat-bad">低45-50pp（未退款93%+）</td>
+                        </tr>
+                        <tr>
+                            <td><strong>定金率</strong></td>
+                            <td>8.48%</td><td>9.08%</td><td>8.30%</td><td>8.82%</td><td>9.65%</td>
+                            <td>低23-28pp（未退款32-38%）</td>
+                        </tr>
+                        <tr>
+                            <td><strong>定金人头率</strong></td>
+                            <td class="heat-good">40.99%</td><td class="heat-good">41.57%</td><td class="heat-good">43.47%</td><td class="heat-good">40.66%</td><td class="heat-good">42.25%</td>
+                            <td>接近未退款（交定金≈已转化）</td>
+                        </tr>
+                        <tr>
+                            <td><strong>人效</strong></td>
+                            <td>29</td><td>31</td><td>32</td><td>34</td><td>31</td>
+                            <td>约为未退款的一半</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="summary-box" style="margin-top:16px;">
+                    <h4>核心结论 & 策略方向</h4>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:8px;">
+                        <div style="border-left:3px solid #E6A23C; padding-left:12px;">
+                            <strong style="color:#E6A23C">思维退盒策略</strong>
+                            <ul style="font-size:13px; margin-top:4px;">
+                                <li>退盒占比从3.7%→27%（7倍），退盒转率始终<5%</li>
+                                <li>未退盒转率也在下滑（22.5%→17.2%），退盒是放大器非根因</li>
+                                <li><strong>方向：</strong>①吸引退盒用户到课（课程内容吸引力+到课提醒触达，当前到课极低是第一卡点）②到课后精准分层触达（高购买力退盒用户仍有转化可能）③降低退盒率（发货时效+产品力）</li>
+                            </ul>
+                        </div>
+                        <div style="border-left:3px solid #4A90D9; padding-left:12px;">
+                            <strong style="color:#4A90D9">剑桥退款策略</strong>
+                            <ul style="font-size:13px; margin-top:4px;">
+                                <li><strong>最大杠杆=到课率：</strong>退款用户到课仅43-52%（vs未退款93%+），但一旦交定金人头率40%+与未退款接近</li>
+                                <li>链路卡点清晰：<strong>到课低→定金低→转率低</strong>，提升到课是第一优先级</li>
+                                <li><strong>方向：</strong>①吸引退款用户到课（课程吸引力+短信/微信触达+到课激励）②到课退款用户精准分层跟进（到课=高潜，定金转化率已验证40%+）③未退款用户保持高密度服务（持续+9pp验证有效）</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 空置期专题 -->
+            <div class="card">
+                <div class="card-title">空置期分布 & 转率影响</div>
+                <div class="chart-row">
+                    <div class="chart-container" id="chart-var-vacancy-dist"></div>
+                    <div class="chart-container" id="chart-var-vacancy-rate"></div>
+                </div>
+                <table class="data-table" style="margin-top:16px;">
+                    <thead>
+                        <tr>
+                            <th rowspan="2">空置期</th>
+                            <th colspan="4" style="color:#E6A23C">思维（占比）</th>
+                            <th colspan="4" style="color:#4A90D9">剑桥（占比）</th>
+                            <th colspan="4" style="color:#67C23A">人文（占比）</th>
+                        </tr>
+                        <tr>
+                            <th>春1</th><th>春2</th><th>春3</th><th>春4</th>
+                            <th>春1</th><th>春2</th><th>春3</th><th>春4</th>
+                            <th>春1</th><th>春2</th><th>春3</th><th>春4</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>0-7天</strong></td>
+                            <td>15%</td><td>25%</td><td>12%</td><td>8%</td>
+                            <td>20%</td><td>15%</td><td>10%</td><td>8%</td>
+                            <td>22%</td><td>30%</td><td>38%</td><td class="heat-good">45%</td>
+                        </tr>
+                        <tr>
+                            <td><strong>8-14天</strong></td>
+                            <td>20%</td><td>35%</td><td>18%</td><td>12%</td>
+                            <td>25%</td><td>20%</td><td>15%</td><td>12%</td>
+                            <td>40%</td><td>35%</td><td>32%</td><td>30%</td>
+                        </tr>
+                        <tr>
+                            <td><strong>15-21天</strong></td>
+                            <td>35%</td><td>25%</td><td>38%</td><td>35%</td>
+                            <td>30%</td><td>35%</td><td class="heat-bad">45%</td><td>20%</td>
+                            <td>25%</td><td>22%</td><td>20%</td><td>18%</td>
+                        </tr>
+                        <tr>
+                            <td><strong>21天+</strong></td>
+                            <td>30%</td><td>15%</td><td>32%</td><td class="heat-bad">45%</td>
+                            <td>25%</td><td>30%</td><td>30%</td><td class="heat-bad">60%</td>
+                            <td>13%</td><td>13%</td><td>10%</td><td>7%</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="data-table" style="margin-top:12px;">
+                    <thead>
+                        <tr><th>空置期</th><th colspan="3">转率（三业务均值）</th><th>vs 0-7天差值</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>0-7天</strong></td><td style="color:#E6A23C">26%+</td><td style="color:#4A90D9">24%+</td><td style="color:#67C23A">22%+</td><td>基准</td></tr>
+                        <tr><td><strong>8-14天</strong></td><td style="color:#E6A23C">22-24%</td><td style="color:#4A90D9">22-23%</td><td style="color:#67C23A">20-21%</td><td>-2~3pp</td></tr>
+                        <tr><td><strong>15-21天</strong></td><td style="color:#E6A23C">18-20%</td><td style="color:#4A90D9">19-20%</td><td style="color:#67C23A">17-18%</td><td class="heat-mid">-4~6pp</td></tr>
+                        <tr><td><strong>21天+</strong></td><td style="color:#E6A23C">14-16%</td><td style="color:#4A90D9">17-18%</td><td style="color:#67C23A">14-15%</td><td class="heat-bad">-7~10pp</td></tr>
+                    </tbody>
+                </table>
+                <p style="margin-top:12px;font-size:13px;color:#555;line-height:1.6;"><strong>结论：</strong>空置期>21天转率普遍下降7-10pp。思维春4有45%用户>21天（vs春2仅15%），是转率-7pp的最大单一变量；剑桥春4 60%用户>21天但淡季需求平稳、敏感度低；人文春4 45%用户在0-7天（W0恢复后持续改善），空置期已不是瓶颈。<strong>思维和剑桥缩短空置期至≤21天，预计各可提升+2~3pp。</strong></p>
+            </div>
+
+
+            <!-- 正价课退费 -->
+            <div class="card">
+                <div class="card-title">正价课退费率对比（续报后退费）</div>
+                <table class="data-table">
+                    <thead>
+                        <tr><th>项目</th><th>春1</th><th>春2</th><th>春3</th><th>春4</th><th>趋势</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="badge badge-siwei">思维</span></td>
+                            <td>9.36%</td><td>7.27%</td><td>6.69%</td><td>4.84%</td>
+                            <td class="heat-good">持续下降 ↓</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-jianqiao">剑桥</span></td>
+                            <td>4.85%</td><td class="heat-bad">12.39%</td><td>7.03%</td><td>3.38%</td>
+                            <td>春2异常高后回落</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-renwen">人文</span></td>
+                            <td>3.54%</td><td>4.67%</td><td>4.42%</td><td>1.30%</td>
+                            <td class="heat-good">持续下降 ↓</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p style="margin-top:12px;font-size:13px;color:#555;line-height:1.6;"><strong>结论：</strong>三项目正价课退费率均呈改善趋势。思维从9.36%→4.84%，人文从3.54%→1.30%（春4历史最低），说明续报用户质量在提升。剑桥春2异常（12.39%）与分级别售卖后预期不匹配有关，后已修复。</p>
+            </div>
+
+            <!-- 用户类型 & 购买力 -->
+            <div class="card">
+                <div class="card-title">用户类型 & 购买力分层</div>
+                <table class="data-table">
+                    <thead>
+                        <tr><th>业务</th><th>纯新用户</th><th>历史无课</th><th>系统课断课</th><th>导流课断课</th><th>前一季在读</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="badge badge-siwei">思维</span></td>
+                            <td class="heat-good">高(第1)</td><td>中</td><td>中低</td><td class="heat-bad">低</td><td class="heat-bad">最低</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-jianqiao">剑桥</span></td>
+                            <td>中(第4)</td><td>中高(第2)</td><td class="heat-good">最高(第1)</td><td class="heat-bad">最低(第5)</td><td>-</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-renwen">人文</span></td>
+                            <td class="heat-good">23.76%</td><td>20.81%</td><td>20.68%</td><td>16.90%</td><td class="heat-bad">12.77%</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="chart-container-sm" id="chart-portrait-city" style="margin-top:16px;"></div>
+                <p style="margin-top:12px;font-size:13px;color:#555;line-height:1.6;"><strong>结论：</strong>三业务共性——已流失用户召回难度极大（导流课断课/前一季在读转率最低）；高购买力(1级)始终是核心贡献（思维1级从33.4%降至22.7%仍远高于中低）；城市越下沉转率越低（但剑桥衰减最小，一线vs四线仅4.3pp）。</p>
+            </div>
+        </div>
+
+        <!-- Tab 5: 满意度&服务 -->
+        <div class="tab-content" id="tab-4">
+            <h2 class="section-title">满意度 & 服务覆盖</h2>
+            <!-- 剑桥满意度 -->
+            <div class="card">
+                <div class="card-title"><span class="dot dot-jianqiao"></span>剑桥满意度数据（春1-5）</div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>期次</th><th>总人数</th><th>提交人数</th><th>提交率</th>
+                            <th>"会的"占比</th><th>"会的"转率</th>
+                            <th>"再想想"占比</th><th>"再想想"转率</th>
+                            <th>"不考虑"占比</th><th>"不考虑"转率</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>春1</strong></td><td>15082</td><td>4338</td><td>28.76%</td>
+                            <td>27.39%</td><td>43.01%</td>
+                            <td>69.82%</td><td>27.60%</td>
+                            <td>2.40%</td><td>12.50%</td>
+                        </tr>
+                        <tr>
+                            <td><strong>春2</strong></td><td>11954</td><td>2844</td><td>23.79%</td>
+                            <td>31.47%</td><td>41.23%</td>
+                            <td>66.81%</td><td>28.47%</td>
+                            <td>1.72%</td><td>12.24%</td>
+                        </tr>
+                        <tr>
+                            <td><strong>春3</strong></td><td>11598</td><td>2315</td><td class="heat-bad">19.96%</td>
+                            <td>24.58%</td><td class="heat-good">50.44%</td>
+                            <td>73.39%</td><td class="heat-good">32.37%</td>
+                            <td>2.12%</td><td>10.20%</td>
+                        </tr>
+                        <tr>
+                            <td><strong>春4</strong></td><td>9955</td><td>2637</td><td>26.49%</td>
+                            <td>27.34%</td><td class="heat-good">48.96%</td>
+                            <td>70.88%</td><td class="heat-good">32.16%</td>
+                            <td>1.82%</td><td>12.50%</td>
+                        </tr>
+                        <tr>
+                            <td><strong>春5</strong></td><td>10964</td><td>2983</td><td>27.21%</td>
+                            <td>30.34%</td><td class="heat-good">53.26%</td>
+                            <td>67.95%</td><td class="heat-good">36.66%</td>
+                            <td>1.71%</td><td>11.76%</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="chart-container" id="chart-satisfy-jianqiao" style="margin-top:16px;"></div>
+            </div>
+            <!-- 人文满意度 -->
+            <div class="card">
+                <div class="card-title"><span class="dot dot-renwen"></span>人文满意度数据（199尖子生）</div>
+                <table class="data-table">
+                    <thead>
+                        <tr><th>期次</th><th>提交率</th><th>"会的"转率</th><th>"再想想"转率</th><th>"不考虑"转率</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>春1</strong></td><td>32.8%(起点)</td><td>35.34%</td><td>19.74%</td><td>10.34%</td></tr>
+                        <tr><td><strong>春2</strong></td><td>32.3%</td><td>39.65%</td><td>25.86%</td><td>3.08%</td></tr>
+                        <tr><td><strong>春3</strong></td><td class="heat-good">48.9%(跃升)</td><td>41.75%</td><td>22.40%</td><td>5.45%</td></tr>
+                        <tr><td><strong>春4</strong></td><td>37.1%</td><td>41.33%</td><td>23.40%</td><td>6.45%</td></tr>
+                    </tbody>
+                </table>
+                <div class="chart-container-sm" id="chart-satisfy-renwen" style="margin-top:16px;"></div>
+            </div>
+            <!-- 思维满意度 & V1覆盖 -->
+            <div class="card">
+                <div class="card-title"><span class="dot dot-siwei"></span>思维满意度 & V1覆盖趋势</div>
+                <div class="chart-container-sm" id="chart-satisfy-siwei"></div>
+                <table class="data-table" style="margin-top:16px;">
+                    <thead>
+                        <tr><th>期次</th><th>孩子喜欢(D+E)占比</th><th>高满意用户转化效率</th><th>变化</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>春1</strong></td><td class="heat-good">56.22%</td><td>32.23%</td><td>基准</td></tr>
+                        <tr><td><strong>春2</strong></td><td>48.00%</td><td>—</td><td class="heat-bad">D+E占比-8.22pp</td></tr>
+                        <tr><td><strong>春3</strong></td><td>42.00%</td><td>—</td><td class="heat-bad">D+E占比-6pp</td></tr>
+                        <tr><td><strong>春4</strong></td><td class="heat-bad">38.27%</td><td>31.19%</td><td class="heat-bad">D+E占比-3.73pp，转化效率-1.04pp</td></tr>
+                    </tbody>
+                </table>
+                <div class="insight-box">
+                    <h4>思维满意度核心发现</h4>
+                    <ul>
+                        <li><strong>满意度与转率双降：</strong>高满意度(D+E)占比从56.22%降至38.27%（-18pp），同期转化效率从32.23%降至31.19%</li>
+                        <li><strong>核心原因：</strong>课程内容或服务的交付体验未达到用户预期——即使用户表示"喜欢"，也不愿为后续课程付费</li>
+                        <li><strong>"喜欢≠付费"：</strong>高人效下问卷覆盖面广但服务深度不足，满意度质量下滑；下沉用户只认校内考试分数，"思维力"抽象价值难打透</li>
+                        <li><strong>对比剑桥/人文：</strong>剑桥"会的"转率持续升高（43→53%），人文满意度提交率跃升（33→49%）——思维缺少类似的正向飞轮</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- 三业务满意度杠杆 -->
+            <div class="card">
+                <div class="card-title">三业务满意度杠杆对比</div>
+                <table class="data-table">
+                    <thead>
+                        <tr><th>维度</th><th style="color:#4A90D9">剑桥</th><th style="color:#67C23A">人文</th><th style="color:#E6A23C">思维</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>满意度指标</strong></td>
+                            <td>"会报名"/"再想想"/"不考虑"</td>
+                            <td>"会报名"/"再想想"/"不考虑"</td>
+                            <td>"孩子喜欢"(D+E) / "会考虑"</td>
+                        </tr>
+                        <tr>
+                            <td><strong>提交率趋势</strong></td>
+                            <td>28.76%→19.96%→27.21%<br>（V字回升）</td>
+                            <td>32.8%→48.9%→37.1%<br>（春3跃升后回落）</td>
+                            <td class="heat-bad">逐期下降<br>（高人效下覆盖面广但深度不足）</td>
+                        </tr>
+                        <tr>
+                            <td><strong>高意向转率趋势</strong></td>
+                            <td class="heat-good">"会的"43.01%→53.26%<br>（+10pp，持续提升）</td>
+                            <td>"会的"35.34%→41.33%<br>（+6pp）</td>
+                            <td class="heat-bad">高满意转率32.23%→31.19%<br>（满意≠付费，效果感知不足）</td>
+                        </tr>
+                        <tr>
+                            <td><strong>满意度占比</strong></td>
+                            <td>"会的"占比27-31%</td>
+                            <td>"会的"占比波动</td>
+                            <td class="heat-bad">D+E占比56.22%→38.27%<br>（-18pp，用户体验交付下滑）</td>
+                        </tr>
+                        <tr>
+                            <td><strong>核心杠杆</strong></td>
+                            <td>圆桌答疑 + 课后5min</td>
+                            <td>课前激活 + 答疑率</td>
+                            <td>V1覆盖深度 + 发布会到课</td>
+                        </tr>
+                        <tr>
+                            <td><strong>突破方向</strong></td>
+                            <td>提交率回升 + 高意向转化率持续创新高</td>
+                            <td>提交率稳定40%+ + "再想想"人群转化</td>
+                            <td>提升效果外化（校内分数可视化）+ "会考虑"→付费转化</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="insight-box" style="margin-top:12px;">
+                    <p><strong>跨项目对比：</strong>剑桥和人文的满意度是"正向飞轮"——提交率↑→高意向转率↑→整体转率↑；思维是"反向螺旋"——高满意度占比↓+高满意转率↓→双降。核心差异在于<strong>效果外化能力</strong>：剑桥有圆桌答疑即时反馈、人文有作文批改可视化成果，思维"思维力"抽象难感知。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 6: 5pp路径&暑秋 -->
+        <div class="tab-content" id="tab-5">
+            <h2 class="section-title">5pp提升路径 & 暑秋策略</h2>
+            <!-- 5pp瀑布图 -->
+            <div class="card">
+                <div class="card-title">转率+5pp路径拆解</div>
+                <div class="chart-container" id="chart-waterfall"></div>
+            </div>
+            <!-- 暑秋核心策略方向 -->
+            <div class="card">
+                <div class="card-title">暑秋核心策略方向</div>
+                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:20px;">
+                    <div class="strategy-card" style="margin-bottom:0;">
+                        <h3 style="color:#E6A23C;">思维重点方向</h3>
+                        <div class="item"><span><strong>1. 商务渠道用户画像 & 转率</strong></span><span style="color:#E6A23C;">高优先级</span></div>
+                        <div class="item"><span>痛点</span><span>商务占比春4达19%，转率仅10%</span></div>
+                        <div class="item"><span>方向</span><span>精细化画像分层，差异化SOP</span></div>
+                        <div class="item"><span><strong>2. 降低退盒率</strong></span><span style="color:#E6A23C;">核心杠杆</span></div>
+                        <div class="item"><span>痛点</span><span>退盒3.7%→27%，转率始终<5%</span></div>
+                        <div class="item"><span>方向</span><span>产品力+发货时效+分层触达</span></div>
+                        <div class="item"><span><strong>3. 空置期课程活跃度</strong></span><span style="color:#E6A23C;">可控变量</span></div>
+                        <div class="item"><span>痛点</span><span>空置>21天占比45%，转率降7-10pp</span></div>
+                        <div class="item"><span>方向</span><span>刺激到课参与+轻量互动+到课激励</span></div>
+                    </div>
+                    <div class="strategy-card" style="margin-bottom:0;">
+                        <h3 style="color:#4A90D9;">剑桥重点方向</h3>
+                        <div class="item"><span><strong>1. 商务渠道用户画像 & 转率</strong></span><span style="color:#4A90D9;">新增量</span></div>
+                        <div class="item"><span>现状</span><span>商务7.34%初步验证，画像差异大</span></div>
+                        <div class="item"><span>方向</span><span>购买力/教育意识分层，匹配课程包</span></div>
+                        <div class="item"><span><strong>2. 退款用户转化</strong></span><span style="color:#4A90D9;">第一杠杆</span></div>
+                        <div class="item"><span>痛点</span><span>退款占比45.6%，到课仅43-52%</span></div>
+                        <div class="item"><span>方向</span><span>吸引到课→分层运营（定金人头率40%+）</span></div>
+                        <div class="item"><span><strong>3. 空置期课程活跃度</strong></span><span style="color:#4A90D9;">可控变量</span></div>
+                        <div class="item"><span>痛点</span><span>60%用户>21天空置</span></div>
+                        <div class="item"><span>方向</span><span>课程活跃度提升，刺激到课参与</span></div>
+                    </div>
+                    <div class="strategy-card" style="margin-bottom:0;">
+                        <h3 style="color:#67C23A;">人文重点方向</h3>
+                        <div class="item"><span><strong>1. 退费用户转化</strong></span><span style="color:#67C23A;">核心痛点</span></div>
+                        <div class="item"><span>痛点</span><span>春5退款转率仅7%，到课<20%，占比逐期上升</span></div>
+                        <div class="item"><span>方向</span><span>参考剑桥退款激活打法，到课是第一优先级</span></div>
+                        <div class="item"><span><strong>2. 郑州新团队链路理解</strong></span><span style="color:#67C23A;">团队建设</span></div>
+                        <div class="item"><span>痛点</span><span>新团队对转化链路理解不足，方差大</span></div>
+                        <div class="item"><span>方向</span><span>培训体系+链路SOP标准化+关注团队方差收敛</span></div>
+                        <div class="item"><span><strong>3. IP链路学习剑桥打法</strong></span><span style="color:#67C23A;">新增量</span></div>
+                        <div class="item"><span>现状</span><span>后续将新增IP链路（99IP品）</span></div>
+                        <div class="item"><span>方向</span><span>学习剑桥IP转率19.59%的运营经验，适配人文用户</span></div>
+                    </div>
+                </div>
+                <div class="insight-box" style="margin-top:16px;">
+                    <h4>策略逻辑</h4>
+                    <ul>
+                        <li><strong>渠道结构不可逆：</strong>商务渠道和导流渠道占比提升是大趋势，不能期待结构回调，应聚焦如何在新结构下提升各渠道转率</li>
+                        <li><strong>退盒/退款是分层运营题：</strong>思维降退盒率+剑桥提退款到课率，本质都是让低意向用户"动起来"</li>
+                        <li><strong>空置期不是"缩短"而是"激活"：</strong>排期决定空置天数难改变，核心是让空置期用户保持课程活跃度、到课参与，而非被动等待</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- 已验证策略 -->
+            <div class="card">
+                <div class="card-title">已验证策略汇总</div>
+                <table class="data-table">
+                    <thead>
+                        <tr><th>策略</th><th>验证业务</th><th>效果</th><th>适用场景</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>恢复W0</td>
+                            <td><span class="badge badge-renwen">人文</span></td>
+                            <td class="heat-good">通时+120%，覆盖+20-30pp，一轮+6.81pp</td>
+                            <td>有空置期的业务</td>
+                        </tr>
+                        <tr>
+                            <td>换主讲(罗西)</td>
+                            <td><span class="badge badge-jianqiao">剑桥</span></td>
+                            <td class="heat-good">直出+2.11pp</td>
+                            <td>发布会/直播间</td>
+                        </tr>
+                        <tr>
+                            <td>首日定金跟进</td>
+                            <td><span class="badge badge-jianqiao">剑桥</span></td>
+                            <td class="heat-good">定金转化+7.64pp</td>
+                            <td>定金策略业务</td>
+                        </tr>
+                        <tr>
+                            <td>低人效精细化</td>
+                            <td><span class="badge badge-renwen">人文</span></td>
+                            <td class="heat-good">人效29转率21.37%>人效56</td>
+                            <td>极致服务验证</td>
+                        </tr>
+                        <tr>
+                            <td>小低及时反馈</td>
+                            <td><span class="badge badge-jianqiao">剑桥</span></td>
+                            <td class="heat-good">+2.79pp</td>
+                            <td>低年级用户</td>
+                        </tr>
+                        <tr>
+                            <td>满意度前置</td>
+                            <td><span class="badge badge-renwen">人文</span></td>
+                            <td class="heat-good">提交率32%→49%，会的转率44%</td>
+                            <td>需意向分层的业务</td>
+                        </tr>
+                        <tr>
+                            <td>269涨价</td>
+                            <td><span class="badge badge-jianqiao">剑桥</span></td>
+                            <td class="heat-mid">转率差来自空置期非价格本身</td>
+                            <td>客单调整</td>
+                        </tr>
+                        <tr>
+                            <td>商务渠道</td>
+                            <td><span class="badge badge-jianqiao">剑桥</span></td>
+                            <td class="heat-mid">7.34%初步验证</td>
+                            <td>新增量来源</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- 风险项 -->
+            <div class="card">
+                <div class="card-title">需持续关注的风险</div>
+                <div class="insight-box" style="border-left-color:#f56c6c;">
+                    <ul>
+                        <li><strong>思维退盒持续攀升：</strong>若无法控制在20%以内，将持续拉低整体转率2-3pp</li>
+                        <li><strong>商务渠道用户画像差异大：</strong>购买力低+到课折损高+失联率高，不能用统一SOP服务，需独立分层运营</li>
+                        <li><strong>退款用户占比逐期上升：</strong>剑桥从38%→45.6%，到课仅43%为核心瓶颈，激活到课是前提</li>
+                        <li><strong>空置期结构性难改：</strong>排期决定空置天数，策略应聚焦"空置期内如何让用户动起来"而非压缩天数</li>
+                        <li><strong>人文量级持续萎缩：</strong>7011→2692(春4)，外部投放ROI走低，需观察暑秋三品合并后能否恢复</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部数据源链接 -->
+        <div class="card" style="margin-top:32px; background:linear-gradient(135deg,#f8f9fc,#fff); border:1px solid #e0e0e0;">
+            <div class="card-title" style="font-size:14px;">数据源文档</div>
+            <div style="display:flex; gap:16px; flex-wrap:wrap;">
+                <a href="https://shimo.zhenguanyu.com/docs/wKDta6uZvGreoFOg/" target="_blank" style="flex:1; min-width:200px; padding:12px 16px; border-radius:8px; background:#fff; border:1px solid #f0c78a; text-decoration:none; color:#333; font-size:13px; display:flex; align-items:center; gap:8px;">
+                    <span class="badge badge-siwei">思维</span>525思维项目春1-4数据总结及期次大事记
+                </a>
+                <a href="https://shimo.zhenguanyu.com/docs/WuYFSFS8R4Nr2Ioh/" target="_blank" style="flex:1; min-width:200px; padding:12px 16px; border-radius:8px; background:#fff; border:1px solid #b8d4f0; text-decoration:none; color:#333; font-size:13px; display:flex; align-items:center; gap:8px;">
+                    <span class="badge badge-jianqiao">剑桥</span>5.25剑桥项目春1-5数据总结及期次大事记
+                </a>
+                <a href="https://shimo.zhenguanyu.com/docs/APKyuPnAMycjJEHs/" target="_blank" style="flex:1; min-width:200px; padding:12px 16px; border-radius:8px; background:#fff; border:1px solid #b8e6a0; text-decoration:none; color:#333; font-size:13px; display:flex; align-items:center; gap:8px;">
+                    <span class="badge badge-renwen">人文</span>5.25人文项目春1-4数据总结及期次大事记
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Colors
+        const COLOR_JIANQIAO = '#4A90D9';
+        const COLOR_RENWEN = '#67C23A';
+        const COLOR_SIWEI = '#E6A23C';
+
+        // Common chart options
+        const commonGrid = { top: 60, right: 30, bottom: 40, left: 60 };
+        const commonTooltip = { trigger: 'axis', backgroundColor: 'rgba(255,255,255,0.95)', borderColor: '#eee', textStyle: { color: '#333', fontSize: 13 } };
+
+        // Track which tabs have been initialized
+        var tabInitialized = {};
+        var allCharts = [];
+
+        function switchTab(idx) {
+            document.querySelectorAll('.tab-content').forEach((el, i) => {
+                el.classList.toggle('active', i === idx);
+            });
+            document.querySelectorAll('.nav-list li').forEach((el, i) => {
+                el.classList.toggle('active', i === idx);
+            });
+            // Initialize charts for this tab if not done yet
+            setTimeout(() => {
+                if (!tabInitialized[idx]) {
+                    initTabCharts(idx);
+                    tabInitialized[idx] = true;
+                } else {
+                    allCharts.forEach(c => c && c.resize());
+                }
+            }, 50);
+        }
+
+        // Helper function
+        var funnelPeriods = ['春1', '春2', '春3', '春4'];
+        var funnelPeriodsJQ = ['春1', '春2', '春3', '春4', '春5'];
+        function fLine(name, data, color, dashed) {
+            return { name: name, type: 'line', data: data, smooth: true, symbol: 'circle', symbolSize: 8,
+                lineStyle: { width: dashed ? 2 : 3, type: dashed ? 'dashed' : 'solid' },
+                itemStyle: { color: color } };
+        }
+
+        function createChart(id, option) {
+            var dom = document.getElementById(id);
+            if (!dom) return null;
+            var chart = echarts.init(dom);
+            chart.setOption(option);
+            allCharts.push(chart);
+            return chart;
+        }
+
+        function initTabCharts(idx) {
+            if (idx === 0) {
+                createChart('chart-overview-rate', {
+                    tooltip: commonTooltip,
+                    legend: { data: ['剑桥', '人文', '思维'], top: 10 },
+                    grid: commonGrid,
+                    xAxis: { type: 'category', data: ['春1', '春2', '春3', '春4', '春5'] },
+                    yAxis: { type: 'value', name: '转率(%)', min: 14, max: 26, axisLabel: { formatter: '{value}%' } },
+                    series: [
+                        { name: '剑桥', type: 'line', data: [17.37, 19.26, 19.64, 19.11, 19.99], color: COLOR_JIANQIAO, smooth: true, symbol: 'circle', symbolSize: 8 },
+                        { name: '人文', type: 'line', data: [16.9, 19.3, 19.3, 19.87, null], color: COLOR_RENWEN, smooth: true, symbol: 'circle', symbolSize: 8 },
+                        { name: '思维', type: 'line', data: [23.2, 19.4, 19.3, 16.1, null], color: COLOR_SIWEI, smooth: true, symbol: 'circle', symbolSize: 8 }
+                    ]
+                });
+                createChart('chart-overview-volume', {
+                    tooltip: commonTooltip,
+                    legend: { data: ['剑桥', '人文', '思维'], top: 10 },
+                    grid: commonGrid,
+                    xAxis: { type: 'category', data: ['春1', '春2', '春3', '春4', '春5'] },
+                    yAxis: { type: 'value', name: '量级(人)' },
+                    series: [
+                        { name: '剑桥', type: 'bar', data: [15075, 11947, 11596, 9953, 10961], color: COLOR_JIANQIAO, barMaxWidth: 30 },
+                        { name: '人文', type: 'bar', data: [7011, 5623, 4126, 2692, null], color: COLOR_RENWEN, barMaxWidth: 30 },
+                        { name: '思维', type: 'bar', data: [10572, 10230, 10634, 14893, null], color: COLOR_SIWEI, barMaxWidth: 30 }
+                    ]
+                });
+                createChart('chart-overview-roi', {
+                    tooltip: commonTooltip,
+                    legend: { data: ['剑桥', '人文', '思维'], top: 10 },
+                    grid: commonGrid,
+                    xAxis: { type: 'category', data: ['春1', '春2', '春3', '春4', '春5'] },
+                    yAxis: { type: 'value', name: 'ROI', min: 0.5, max: 0.95, axisLabel: { formatter: '{value}' } },
+                    series: [
+                        { name: '剑桥', type: 'line', data: [0.73, 0.81, 0.83, 0.79, 0.78], color: COLOR_JIANQIAO, smooth: true, symbol: 'circle', symbolSize: 8 },
+                        { name: '人文', type: 'line', data: [0.73, 0.68, 0.60, 0.65, null], color: COLOR_RENWEN, smooth: true, symbol: 'circle', symbolSize: 8 },
+                        { name: '思维', type: 'line', data: [0.72, 0.80, 0.72, 0.72, null], color: COLOR_SIWEI, smooth: true, symbol: 'circle', symbolSize: 8 }
+                    ]
+                });
+                createChart('chart-overview-efficiency', {
+                    tooltip: commonTooltip,
+                    legend: { data: ['剑桥', '人文', '思维'], top: 10 },
+                    grid: commonGrid,
+                    xAxis: { type: 'category', data: ['春1', '春2', '春3', '春4', '春5'] },
+                    yAxis: { type: 'value', name: '人效', min: 30, max: 110 },
+                    series: [
+                        { name: '剑桥', type: 'line', data: [79, 79, 78, 76, 69], color: COLOR_JIANQIAO, smooth: true, symbol: 'circle', symbolSize: 8 },
+                        { name: '人文', type: 'line', data: [80, 72, 70, 42, null], color: COLOR_RENWEN, smooth: true, symbol: 'circle', symbolSize: 8 },
+                        { name: '思维', type: 'line', data: [95, 92, 89, 83, null], color: COLOR_SIWEI, smooth: true, symbol: 'circle', symbolSize: 8 }
+                    ]
+                });
+            }
+            else if (idx === 2) {
+                createChart('chart-funnel-headrate', {
+                    title: { text: '人头转率趋势', left: 'center', textStyle: { fontSize: 14 } },
+                    tooltip: commonTooltip,
+                    legend: { data: ['思维', '剑桥', '人文'], bottom: 5 },
+                    grid: { top: 50, right: 30, bottom: 60, left: 55 },
+                    xAxis: { type: 'category', data: funnelPeriodsJQ },
+                    yAxis: { type: 'value', name: '%', min: 10, max: 38, axisLabel: { formatter: '{value}%' } },
+                    series: [
+                        fLine('思维', [26.0, 20.8, 19.3, 16.1, null], COLOR_SIWEI),
+                        fLine('剑桥', [23.6, 27.6, 28.4, 28.7, 32.7], COLOR_JIANQIAO),
+                        fLine('人文', [16.9, 18.7, 18.6, 19.9, null], COLOR_RENWEN)
+                    ]
+                });
+                createChart('chart-funnel-dingjin', {
+                    title: { text: '定金率趋势', left: 'center', textStyle: { fontSize: 14 } },
+                    tooltip: commonTooltip,
+                    legend: { data: ['思维', '剑桥', '人文'], bottom: 5 },
+                    grid: { top: 50, right: 30, bottom: 60, left: 55 },
+                    xAxis: { type: 'category', data: funnelPeriodsJQ },
+                    yAxis: { type: 'value', name: '%', min: 5, max: 42, axisLabel: { formatter: '{value}%' } },
+                    series: [
+                        fLine('思维', [28.3, 24.6, 23.4, 15.6, null], COLOR_SIWEI),
+                        fLine('剑桥', [27.6, 31.9, 32.1, 33.3, 38.2], COLOR_JIANQIAO),
+                        fLine('人文', [12.6, 13.4, 14.6, 8.5, null], COLOR_RENWEN)
+                    ]
+                });
+                createChart('chart-funnel-daoke', {
+                    title: { text: '到课率趋势', left: 'center', textStyle: { fontSize: 14 } },
+                    tooltip: commonTooltip,
+                    legend: { data: ['思维', '剑桥', '人文'], bottom: 5 },
+                    grid: { top: 50, right: 30, bottom: 60, left: 55 },
+                    xAxis: { type: 'category', data: funnelPeriodsJQ },
+                    yAxis: { type: 'value', name: '%', min: 70, max: 100, axisLabel: { formatter: '{value}%' } },
+                    series: [
+                        fLine('思维', [92.2, 84.9, 78.8, 73.6, null], COLOR_SIWEI),
+                        fLine('剑桥', [94.4, 94.5, 94.9, 93.6, 93.5], COLOR_JIANQIAO),
+                        fLine('人文', [93.6, 91.4, 92.9, 94.0, null], COLOR_RENWEN)
+                    ]
+                });
+                createChart('chart-funnel-dayi', {
+                    title: { text: '答疑率/课后5min趋势', left: 'center', textStyle: { fontSize: 14 } },
+                    tooltip: commonTooltip,
+                    legend: { data: ['剑桥答疑率', '人文答疑率', '剑桥课后5min', '人文课后5min'], bottom: 5 },
+                    grid: { top: 50, right: 30, bottom: 80, left: 55 },
+                    xAxis: { type: 'category', data: funnelPeriodsJQ },
+                    yAxis: { type: 'value', name: '%', min: 40, max: 100, axisLabel: { formatter: '{value}%' } },
+                    series: [
+                        fLine('剑桥答疑率', [92.0, 94.0, 94.4, 93.7, 94.1], COLOR_JIANQIAO),
+                        fLine('人文答疑率', [63.9, 57.1, 63.0, 72.0, null], COLOR_RENWEN),
+                        fLine('剑桥课后5min', [64.9, 62.7, 67.4, 69.5, 76.4], COLOR_JIANQIAO, true),
+                        fLine('人文课后5min', [53.0, 57.7, 60.2, 68.5, null], COLOR_RENWEN, true)
+                    ]
+                });
+            }
+            else if (idx === 3) {
+                // 退盒/退款占比柱状图
+                createChart('chart-var-refund', {
+                    tooltip: commonTooltip,
+                    legend: { data: ['思维退盒占比', '思维未退盒转率', '思维退盒转率'], top: 10 },
+                    grid: commonGrid,
+                    xAxis: { type: 'category', data: ['春1', '春2', '春3', '春4'] },
+                    yAxis: [
+                        { type: 'value', name: '占比(%)', min: 0, max: 100, axisLabel: { formatter: '{value}%' } },
+                        { type: 'value', name: '转率(%)', min: 0, max: 30, position: 'right', axisLabel: { formatter: '{value}%' } }
+                    ],
+                    series: [
+                        { name: '思维退盒占比', type: 'bar', data: [3.66, 17.69, 20, 27], itemStyle: { color: '#f56c6c' }, barMaxWidth: 35,
+                          label: { show: true, position: 'top', formatter: '{c}%', fontSize: 11 } },
+                        { name: '思维未退盒转率', type: 'line', yAxisIndex: 1, data: [22.5, 21.2, 21.5, 17.2], itemStyle: { color: COLOR_SIWEI }, smooth: true, symbol: 'circle', symbolSize: 8, lineStyle: { width: 3 },
+                          label: { show: true, position: 'top', formatter: '{c}%', fontSize: 10 } },
+                        { name: '思维退盒转率', type: 'line', yAxisIndex: 1, data: [4.85, 4.0, 4.25, 4.88], itemStyle: { color: '#f56c6c' }, smooth: true, symbol: 'circle', symbolSize: 8, lineStyle: { type: 'dashed' } }
+                    ]
+                });
+                // 剑桥退款柱状图
+                createChart('chart-portrait-jianqiao-refund', {
+                    tooltip: commonTooltip,
+                    legend: { data: ['剑桥退款占比', '未退款转率', '退款转率'], top: 10 },
+                    grid: commonGrid,
+                    xAxis: { type: 'category', data: ['春1', '春2', '春3', '春4', '春5'] },
+                    yAxis: [
+                        { type: 'value', name: '占比(%)', min: 0, max: 50, axisLabel: { formatter: '{value}%' } },
+                        { type: 'value', name: '转率(%)', min: 0, max: 38, position: 'right', axisLabel: { formatter: '{value}%' } }
+                    ],
+                    series: [
+                        { name: '剑桥退款占比', type: 'bar', data: [38, 38, 40.60, 44.17, 45.58], itemStyle: { color: 'rgba(74,144,217,0.4)' }, barMaxWidth: 35,
+                          label: { show: true, position: 'top', formatter: '{c}%', fontSize: 11 } },
+                        { name: '未退款转率', type: 'line', yAxisIndex: 1, data: [23.62, 27.62, 28.43, 28.68, 32.69], itemStyle: { color: COLOR_JIANQIAO }, smooth: true, symbol: 'circle', symbolSize: 8, lineStyle: { width: 3 },
+                          label: { show: true, position: 'top', formatter: '{c}%', fontSize: 10 } },
+                        { name: '退款转率', type: 'line', yAxisIndex: 1, data: [6.43, 7.27, 7.22, 7.57, 7.48], itemStyle: { color: '#f56c6c' }, smooth: true, symbol: 'circle', symbolSize: 8, lineStyle: { type: 'dashed' } }
+                    ]
+                });
+                // 空置期分布（堆叠柱状图）
+                createChart('chart-var-vacancy-dist', {
+                    title: { text: '空置期分布（占比）', left: 'center', textStyle: { fontSize: 14 } },
+                    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' },
+                        formatter: function(params) { var s = params[0].axisValue + '<br>'; params.forEach(function(p){ s += p.marker + p.seriesName + ': ' + p.value + '%<br>'; }); return s; } },
+                    legend: { data: ['0-7天', '8-14天', '15-21天', '21天+'], bottom: 5 },
+                    grid: { top: 50, right: 20, bottom: 60, left: 55 },
+                    xAxis: { type: 'category', data: ['思维春1','思维春2','思维春3','思维春4','剑桥春1','剑桥春2','剑桥春3','剑桥春4','人文春1','人文春2','人文春3','人文春4'],
+                        axisLabel: { fontSize: 10, rotate: 30 } },
+                    yAxis: { type: 'value', name: '%', max: 100, axisLabel: { formatter: '{value}%' } },
+                    series: [
+                        { name: '0-7天', type: 'bar', stack: 'total', data: [15,25,12,8, 20,15,10,8, 22,30,38,45], itemStyle: { color: '#67C23A' }, barMaxWidth: 25 },
+                        { name: '8-14天', type: 'bar', stack: 'total', data: [20,35,18,12, 25,20,15,12, 40,35,32,30], itemStyle: { color: '#409eff' }, barMaxWidth: 25 },
+                        { name: '15-21天', type: 'bar', stack: 'total', data: [35,25,38,35, 30,35,45,20, 25,22,20,18], itemStyle: { color: '#E6A23C' }, barMaxWidth: 25 },
+                        { name: '21天+', type: 'bar', stack: 'total', data: [30,15,32,45, 25,30,30,60, 13,13,10,7], itemStyle: { color: '#f56c6c' }, barMaxWidth: 25 }
+                    ]
+                });
+                // 空置期转率对比
+                createChart('chart-var-vacancy-rate', {
+                    title: { text: '不同空置期转率', left: 'center', textStyle: { fontSize: 14 } },
+                    tooltip: commonTooltip,
+                    legend: { data: ['思维', '剑桥', '人文'], bottom: 5 },
+                    grid: { top: 50, right: 20, bottom: 60, left: 55 },
+                    xAxis: { type: 'category', data: ['0-7天', '8-14天', '15-21天', '21天+'] },
+                    yAxis: { type: 'value', name: '转率(%)', min: 10, max: 30, axisLabel: { formatter: '{value}%' } },
+                    series: [
+                        { name: '思维', type: 'bar', data: [26, 23, 19, 15], itemStyle: { color: COLOR_SIWEI }, barMaxWidth: 30,
+                          label: { show: true, position: 'top', formatter: '{c}%', fontSize: 11 } },
+                        { name: '剑桥', type: 'bar', data: [24, 22.5, 19.5, 17.5], itemStyle: { color: COLOR_JIANQIAO }, barMaxWidth: 30,
+                          label: { show: true, position: 'top', formatter: '{c}%', fontSize: 11 } },
+                        { name: '人文', type: 'bar', data: [22, 20.5, 17.5, 14.5], itemStyle: { color: COLOR_RENWEN }, barMaxWidth: 30,
+                          label: { show: true, position: 'top', formatter: '{c}%', fontSize: 11 } }
+                    ]
+                });
+                // 城市线级
+                createChart('chart-portrait-city', {
+                    tooltip: commonTooltip,
+                    legend: { data: ['剑桥', '人文', '思维'], top: 10 },
+                    grid: commonGrid,
+                    xAxis: { type: 'category', data: ['一线/高线', '二线/中线', '三线', '四五线/低线'] },
+                    yAxis: { type: 'value', name: '转率(%)', min: 12, max: 26, axisLabel: { formatter: '{value}%' } },
+                    series: [
+                        { name: '剑桥', type: 'bar', data: [22, 20.5, 19, 17.7], itemStyle: { color: COLOR_JIANQIAO }, barMaxWidth: 25 },
+                        { name: '人文', type: 'bar', data: [20.68, 17.02, 16.89, 16.89], itemStyle: { color: COLOR_RENWEN }, barMaxWidth: 25 },
+                        { name: '思维', type: 'bar', data: [22, 19, 17, 15.8], itemStyle: { color: COLOR_SIWEI }, barMaxWidth: 25 }
+                    ]
+                });
+            }
+            else if (idx === 4) {
+                createChart('chart-satisfy-jianqiao', {
+                    tooltip: commonTooltip,
+                    legend: { data: ['提交率', '"会的"转率', '"再想想"转率'], top: 10 },
+                    grid: commonGrid,
+                    xAxis: { type: 'category', data: ['春1', '春2', '春3', '春4', '春5'] },
+                    yAxis: { type: 'value', name: '%', min: 15, max: 60, axisLabel: { formatter: '{value}%' } },
+                    series: [
+                        { name: '提交率', type: 'line', data: [28.76, 23.79, 19.96, 26.49, 27.21], color: '#909399', smooth: true, symbol: 'circle', symbolSize: 8, lineStyle: { type: 'dashed' } },
+                        { name: '"会的"转率', type: 'line', data: [43.01, 41.23, 50.44, 48.96, 53.26], color: COLOR_JIANQIAO, smooth: true, symbol: 'circle', symbolSize: 10, lineStyle: { width: 3 } },
+                        { name: '"再想想"转率', type: 'line', data: [27.60, 28.47, 32.37, 32.16, 36.66], color: COLOR_SIWEI, smooth: true, symbol: 'circle', symbolSize: 8 }
+                    ]
+                });
+                createChart('chart-satisfy-renwen', {
+                    tooltip: commonTooltip,
+                    legend: { data: ['提交率', '"会的"转率', '"再想想"转率'], top: 10 },
+                    grid: commonGrid,
+                    xAxis: { type: 'category', data: ['春1', '春2', '春3', '春4'] },
+                    yAxis: { type: 'value', name: '%', min: 0, max: 55, axisLabel: { formatter: '{value}%' } },
+                    series: [
+                        { name: '提交率', type: 'line', data: [32.8, 32.3, 48.9, 37.1], color: '#909399', smooth: true, symbol: 'circle', symbolSize: 8, lineStyle: { type: 'dashed' } },
+                        { name: '"会的"转率', type: 'line', data: [35.34, 39.65, 41.75, 41.33], color: COLOR_RENWEN, smooth: true, symbol: 'circle', symbolSize: 10, lineStyle: { width: 3 } },
+                        { name: '"再想想"转率', type: 'line', data: [19.74, 25.86, 22.40, 23.40], color: COLOR_SIWEI, smooth: true, symbol: 'circle', symbolSize: 8 }
+                    ]
+                });
+                createChart('chart-satisfy-siwei', {
+                    tooltip: commonTooltip,
+                    legend: { data: ['孩子喜欢(D+E)占比', '高满意转化效率'], top: 10 },
+                    grid: commonGrid,
+                    xAxis: { type: 'category', data: ['春1', '春2', '春3', '春4'] },
+                    yAxis: { type: 'value', name: '%', min: 25, max: 60, axisLabel: { formatter: '{value}%' } },
+                    series: [
+                        { name: '孩子喜欢(D+E)占比', type: 'line', data: [56.22, 48, 42, 38.27], color: COLOR_SIWEI, smooth: true, symbol: 'circle', symbolSize: 10, lineStyle: { width: 3 } },
+                        { name: '高满意转化效率', type: 'line', data: [32.23, null, null, 31.19], color: '#f56c6c', smooth: true, symbol: 'circle', symbolSize: 8, lineStyle: { type: 'dashed' } }
+                    ]
+                });
+            }
+            else if (idx === 5) {
+                createChart('chart-waterfall', {
+                    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+                    grid: { top: 60, right: 40, bottom: 50, left: 130 },
+                    xAxis: { type: 'value', name: 'pp', axisLabel: { formatter: '{value}pp' } },
+                    yAxis: { type: 'category', data: ['合计(确定性)', '商务用户分层运营', '发布会到课恢复', '退盒/退款用户激活转化', '空置期课程活跃度提升'] },
+                    series: [
+                        {
+                            type: 'bar',
+                            data: [
+                                { value: 1.5, itemStyle: { color: '#E6A23C' } },
+                                { value: 1, itemStyle: { color: '#67C23A' } },
+                                { value: 2, itemStyle: { color: COLOR_JIANQIAO } },
+                                { value: 3, itemStyle: { color: COLOR_JIANQIAO } },
+                                { value: 4.5, itemStyle: { color: '#9b59b6' } }
+                            ],
+                            barMaxWidth: 30,
+                            label: {
+                                show: true,
+                                position: 'right',
+                                formatter: function(params) {
+                                    var ranges = ['+1~2pp', '+1pp', '+1~2pp', '+2~3pp', '+5~8pp'];
+                                    return ranges[params.dataIndex];
+                                },
+                                fontSize: 12,
+                                color: '#333'
+                            }
+                        }
+                    ]
+                });
+            }
+        }
+
+        // Initialize tab 0 on load
+        initTabCharts(0);
+        tabInitialized[0] = true;
+
+        // Responsive resize
+        window.addEventListener('resize', function() {
+            allCharts.forEach(function(c) { c && c.resize(); });
+        });
+    </script>
+</body>
+</html>
