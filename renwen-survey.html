@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>人文学情问卷·五学季分析看板</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --c-bg:#F7F5F0;--c-card:#FFFDF9;--c-border:#EBE6DC;--c-text:#3D3929;
+  --c-text2:#7A7362;--c-text3:#A69F8E;--c-accent:#C47D5A;--c-accent2:#5B8A72;--c-accent3:#6B7FA3;
+  --shadow-sm:0 1px 4px rgba(61,57,41,.06);--shadow-md:0 4px 16px rgba(61,57,41,.08);--radius:16px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Noto Sans SC',sans-serif;background:var(--c-bg);color:var(--c-text);min-height:100vh;-webkit-font-smoothing:antialiased;}
+.header{background:linear-gradient(135deg,#C47D5A 0%,#D4956E 40%,#5B8A72 100%);padding:30px 56px 24px;position:relative;overflow:hidden;}
+.header::before{content:'';position:absolute;top:-80px;right:-80px;width:280px;height:280px;background:rgba(255,255,255,.07);border-radius:50%;}
+.header-inner{display:flex;justify-content:space-between;align-items:center;position:relative;z-index:1;max-width:1500px;margin:0 auto;}
+.header h1{font-size:26px;font-weight:900;color:#fff;letter-spacing:1.5px;}
+.header p{font-size:14px;color:rgba(255,255,255,.82);margin-top:6px;}
+.header-credit{text-align:right;flex-shrink:0;margin-left:24px;}
+.header-credit .label{font-size:12px;color:rgba(255,255,255,.5);letter-spacing:2px;text-transform:uppercase;}
+.header-credit .name{font-size:20px;font-weight:900;color:#fff;margin-top:2px;}
+.tabs{display:flex;gap:10px;padding:20px 56px 0;max-width:1500px;margin:0 auto;flex-wrap:wrap;}
+.tab-btn{padding:11px 22px;border-radius:12px;border:1.5px solid var(--c-border);background:var(--c-card);color:var(--c-text3);font-size:14px;font-weight:500;cursor:pointer;white-space:nowrap;transition:all .25s;font-family:inherit;flex:1;text-align:center;}
+.tab-btn:hover{border-color:var(--c-accent);color:var(--c-accent);}
+.tab-btn.active{background:var(--c-accent);color:#fff;border-color:var(--c-accent);font-weight:700;box-shadow:0 4px 14px rgba(196,125,90,.3);}
+.content{padding:24px 56px 40px;max-width:1500px;margin:0 auto;}
+.page{display:none;animation:fadeIn .35s ease;}
+.page.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+.top-section{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;}
+.conclusion-card{background:linear-gradient(135deg,#FFF8F0 0%,#F0F7F4 50%,#F0F0FA 100%);border-radius:var(--radius);border:1px solid #E6DDD0;padding:26px 28px;box-shadow:var(--shadow-md);line-height:1.9;font-size:14.5px;color:var(--c-text);}
+.insights-panel{display:flex;flex-direction:column;gap:12px;}
+.insight{display:flex;gap:14px;align-items:flex-start;padding:16px 20px;border-radius:var(--radius);background:linear-gradient(135deg,#FDFBF7 0%,#F8F5EF 100%);border:1px solid var(--c-border);flex:1;}
+.insight-icon{font-size:20px;flex-shrink:0;margin-top:2px;}
+.insight-title{font-size:13.5px;font-weight:700;color:var(--c-accent);margin-bottom:5px;}
+.insight-text{font-size:13px;color:var(--c-text2);line-height:1.65;}
+.q-card{background:var(--c-card);border-radius:var(--radius);border:1px solid var(--c-border);padding:16px 24px;box-shadow:var(--shadow-sm);margin-bottom:20px;}
+.q-title{font-size:12px;color:var(--c-accent);font-weight:700;margin-bottom:4px;letter-spacing:2px;text-transform:uppercase;}
+.q-text{font-size:15px;color:var(--c-text);line-height:1.6;}
+.card{background:var(--c-card);border-radius:var(--radius);border:1px solid var(--c-border);padding:22px 26px;box-shadow:var(--shadow-sm);margin-bottom:20px;}
+.section-title{font-size:15px;font-weight:700;color:var(--c-text);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.bottom-section{display:grid;grid-template-columns:1.05fr .95fr;gap:20px;}
+.heatmap-wrap{overflow-x:auto;}
+.heatmap{width:100%;border-collapse:separate;border-spacing:5px;font-size:13.5px;}
+.heatmap th{padding:10px 10px;font-size:12.5px;font-weight:700;text-align:center;white-space:nowrap;}
+.heatmap th:first-child{text-align:left;color:var(--c-text3);font-weight:500;max-width:230px;white-space:normal;}
+.heatmap td{padding:10px 8px;text-align:center;border-radius:9px;font-weight:700;color:#fff;font-size:13px;}
+.heatmap td:first-child{text-align:left;color:var(--c-text2);font-weight:500;background:#F7F4EE;font-size:12.5px;line-height:1.4;}
+.heat-h{background:#C47D5A;}.heat-m{background:#D9A585;}.heat-l{background:#E7C9B4;color:#7A5638!important;}.heat-v{background:#F2E4D8;color:#A67C5A!important;}
+.season-h{font-size:12px;font-weight:700;}
+.comp-bar{display:flex;height:26px;border-radius:6px;overflow:hidden;margin:4px 0 2px;}
+.comp-seg{display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:700;}
+.comp-row{margin-bottom:12px;}
+.comp-label{font-size:12.5px;color:var(--c-text2);margin-bottom:2px;font-weight:600;}
+.trend-btns{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+.trend-btn{padding:7px 14px;border-radius:9px;border:1.5px solid var(--c-border);background:var(--c-card);color:var(--c-text3);font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s;}
+.trend-btn.active{background:var(--c-accent2);color:#fff;border-color:var(--c-accent2);}
+.legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:14px;justify-content:center;}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--c-text2);}
+.legend-dot{width:12px;height:12px;border-radius:50%;}
+.note{font-size:12.5px;color:var(--c-text3);margin-top:14px;line-height:1.6;padding:12px 16px;background:#FAF7F1;border-radius:10px;border-left:3px solid var(--c-accent);}
+.footer{text-align:center;color:var(--c-text3);font-size:12.5px;margin-top:24px;padding-top:16px;border-top:1px solid var(--c-border);}
+@media(max-width:1100px){.top-section,.bottom-section{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="header"><div class="header-inner">
+  <div><h1>人文学情问卷 · 五学季分析看板</h1><p>141→145学季（25春 / 25暑 / 25秋 / 26寒 / 26春）· 分年级需求演进</p></div>
+  <div class="header-credit"><div class="label">ANALYSIS BY</div><div class="name">洛书</div></div>
+</div></div>
+<div class="tabs" id="tabs"></div>
+<div class="content" id="content"></div>
+<script>
+const DATA = {"modules": {"写作模块": {"opts": ["思想深度，帮助孩子明确写作立意，文章中能写出自己的观点", "素材拓展，补充贴合孩子生活/课本的写作素材、案例，解决“没东西可写”的问题", "结构框架，能让文章结构更清晰，分段更明确", "精彩好句，积累优美词句、修辞手法运用，让作文的语文更生动形象", "迁移运用，针对同一类型的作文可以举一反三，达到“学完能直接用”的效果"], "data": {"思想深度，帮助孩子明确写作立意，文章中能写出自己的观点": {"25秋": {"2": 40.4, "3": 41.2, "4": 42.7, "5": 47.8, "6": 48.5, "ALL": 43.0}, "26寒": {"2": 44.3, "3": 44.3, "4": 43.5, "5": 50.1, "6": 54.2, "ALL": 46.1}, "26春": {"2": 59.3, "3": 57.3, "4": 59.6, "5": 61.3, "6": 49.1, "ALL": 58.5}}, "素材拓展，补充贴合孩子生活/课本的写作素材、案例，解决“没东西可写”的问题": {"25秋": {"2": 37.2, "3": 40.0, "4": 39.1, "5": 38.2, "6": 41.0, "ALL": 39.5}, "26寒": {"2": 37.4, "3": 41.7, "4": 40.4, "5": 38.2, "6": 40.6, "ALL": 40.3}, "26春": {"2": 49.3, "3": 48.1, "4": 49.3, "5": 48.0, "6": 41.0, "ALL": 48.2}}, "结构框架，能让文章结构更清晰，分段更明确": {"25秋": {"2": 37.8, "3": 40.6, "4": 39.5, "5": 36.3, "6": 36.2, "ALL": 39.3}, "26寒": {"2": 40.3, "3": 38.9, "4": 37.7, "5": 37.0, "6": 35.1, "ALL": 38.1}, "26春": {"2": 49.3, "3": 49.4, "4": 48.9, "5": 46.8, "6": 30.7, "ALL": 47.9}}, "精彩好句，积累优美词句、修辞手法运用，让作文的语文更生动形象": {"25秋": {"2": 36.3, "3": 31.0, "4": 30.0, "5": 27.6, "6": 27.4, "ALL": 30.2}, "26寒": {"2": 31.9, "3": 29.5, "4": 29.4, "5": 25.9, "6": 24.4, "ALL": 28.7}, "26春": {"2": 45.3, "3": 39.0, "4": 41.0, "5": 37.7, "6": 27.5, "ALL": 39.9}}, "迁移运用，针对同一类型的作文可以举一反三，达到“学完能直接用”的效果": {"25秋": {"2": 28.0, "3": 25.8, "4": 27.5, "5": 28.8, "6": 26.9, "ALL": 26.8}, "26寒": {"2": 22.5, "3": 24.7, "4": 25.9, "5": 28.2, "6": 27.0, "ALL": 25.5}, "26春": {"2": 28.8, "3": 29.6, "4": 30.1, "5": 30.9, "6": 28.0, "ALL": 29.7}}}}, "阅读模块": {"opts": ["阅读题解题思路，帮助孩子解决看到题目不知道怎么作答的情况", "对内容的理解能力，帮助孩子解决分析人物情感或分析作者观点类型的内容", "阅读素养与写作素材积累，通过精读经典文本、拓展优质阅读内容，帮助孩子积累可用于写作的素材", "阅读速度与效率，针对长篇文本或复杂内容，教孩子快速定位关键信息，避免考试中因读得慢而做不完题", "新考法题目训练，带孩子多练习一些当下的热门新考法题目"], "data": {"阅读题解题思路，帮助孩子解决看到题目不知道怎么作答的情况": {"25秋": {"2": 63.9, "3": 65.8, "4": 68.9, "5": 65.2, "6": 65.1, "ALL": 66.4}, "26寒": {"2": 60.4, "3": 68.6, "4": 66.6, "5": 67.9, "6": 65.6, "ALL": 66.7}, "26春": {"2": 66.1, "3": 69.9, "4": 69.8, "5": 69.0, "6": 63.3, "ALL": 68.7}}, "对内容的理解能力，帮助孩子解决分析人物情感或分析作者观点类型的内容": {"25秋": {"2": 62.7, "3": 61.2, "4": 61.3, "5": 63.0, "6": 63.2, "ALL": 61.7}, "26寒": {"2": 65.3, "3": 62.8, "4": 63.9, "5": 63.6, "6": 64.5, "ALL": 63.7}, "26春": {"2": 70.5, "3": 67.6, "4": 69.6, "5": 69.3, "6": 60.9, "ALL": 68.6}}, "阅读素养与写作素材积累，通过精读经典文本、拓展优质阅读内容，帮助孩子积累可用于写作的素材": {"25秋": {"2": 49.7, "3": 44.6, "4": 42.0, "5": 42.6, "6": 41.8, "ALL": 43.6}, "26寒": {"2": 47.6, "3": 42.6, "4": 41.3, "5": 39.7, "6": 38.7, "ALL": 42.0}, "26春": {"2": 48.8, "3": 42.9, "4": 43.8, "5": 42.6, "6": 38.8, "ALL": 44.0}}, "阅读速度与效率，针对长篇文本或复杂内容，教孩子快速定位关键信息，避免考试中因读得慢而做不完题": {"25秋": {"2": 37.8, "3": 41.2, "4": 42.3, "5": 39.1, "6": 40.6, "ALL": 41.1}, "26寒": {"2": 35.8, "3": 40.4, "4": 38.9, "5": 37.1, "6": 38.7, "ALL": 38.8}, "26春": {"2": 37.0, "3": 40.0, "4": 41.2, "5": 39.4, "6": 39.5, "ALL": 39.6}}, "新考法题目训练，带孩子多练习一些当下的热门新考法题目": {"25秋": {"2": 29.4, "3": 32.1, "4": 33.8, "5": 40.3, "6": 42.4, "ALL": 34.4}, "26寒": {"2": 29.8, "3": 35.2, "4": 36.7, "5": 43.0, "6": 46.3, "ALL": 37.3}, "26春": {"2": 31.7, "3": 33.7, "4": 37.4, "5": 38.7, "6": 42.3, "ALL": 35.5}}}}}, "composition": {"写作模块": {"25秋": {"2": 3.1, "3": 48.6, "4": 27.6, "5": 13.5, "6": 7.1, "N": 18905, "Nby": {"2": 592, "3": 9192, "4": 5212, "5": 2561, "6": 1348}}, "26寒": {"2": 11.3, "3": 38.7, "4": 24.5, "5": 14.2, "6": 11.3, "N": 6695, "Nby": {"2": 756, "3": 2591, "4": 1642, "5": 948, "6": 758}}, "26春": {"2": 18.3, "3": 36.1, "4": 24.5, "5": 16.0, "6": 5.1, "N": 17995, "Nby": {"2": 3292, "3": 6504, "4": 4407, "5": 2882, "6": 910}}}, "阅读模块": {"25秋": {"2": 3.1, "3": 48.6, "4": 27.6, "5": 13.5, "6": 7.1, "N": 18905, "Nby": {"2": 592, "3": 9192, "4": 5212, "5": 2561, "6": 1348}}, "26寒": {"2": 11.3, "3": 38.7, "4": 24.5, "5": 14.2, "6": 11.3, "N": 6695, "Nby": {"2": 756, "3": 2591, "4": 1642, "5": 948, "6": 758}}, "26春": {"2": 18.3, "3": 36.1, "4": 24.5, "5": 16.0, "6": 5.1, "N": 17995, "Nby": {"2": 3292, "3": 6504, "4": 4407, "5": 2882, "6": 910}}}}, "diag_25summer": {"25暑·作文最突出问题": {"opts": ["语言不生动，作文内容只会用一些大白话/网络用语", "内容不具体，写出来的作文内容流水账", "目前写作符合校内要求，还想继续提升孩子的表达能力", "害怕抗拒写作文，每次都磨磨蹭蹭", "不会写，每次都需要父母帮助", "立意不深刻，情感表达不真挚", "不会写，写作文抄网上或者抄AI", "素材选择不恰当，套模板，作文内容比较老套"], "data": {"2": {"语言不生动，作文内容只会用一些大白话/网络用语": 0.0, "内容不具体，写出来的作文内容流水账": 0.0, "目前写作符合校内要求，还想继续提升孩子的表达能力": 0.0, "害怕抗拒写作文，每次都磨磨蹭蹭": 0.0, "不会写，每次都需要父母帮助": 0.0, "立意不深刻，情感表达不真挚": 0.0, "不会写，写作文抄网上或者抄AI": 0.0, "素材选择不恰当，套模板，作文内容比较老套": 0.0}, "3": {"语言不生动，作文内容只会用一些大白话/网络用语": 51.5, "内容不具体，写出来的作文内容流水账": 44.2, "目前写作符合校内要求，还想继续提升孩子的表达能力": 23.0, "害怕抗拒写作文，每次都磨磨蹭蹭": 26.5, "不会写，每次都需要父母帮助": 24.2, "立意不深刻，情感表达不真挚": 0.0, "不会写，写作文抄网上或者抄AI": 0.0, "素材选择不恰当，套模板，作文内容比较老套": 2.2}, "4": {"语言不生动，作文内容只会用一些大白话/网络用语": 48.8, "内容不具体，写出来的作文内容流水账": 47.0, "目前写作符合校内要求，还想继续提升孩子的表达能力": 19.4, "害怕抗拒写作文，每次都磨磨蹭蹭": 31.8, "不会写，每次都需要父母帮助": 26.3, "立意不深刻，情感表达不真挚": 0.0, "不会写，写作文抄网上或者抄AI": 0.0, "素材选择不恰当，套模板，作文内容比较老套": 5.3}, "5": {"语言不生动，作文内容只会用一些大白话/网络用语": 56.2, "内容不具体，写出来的作文内容流水账": 52.4, "目前写作符合校内要求，还想继续提升孩子的表达能力": 18.6, "害怕抗拒写作文，每次都磨磨蹭蹭": 0.0, "不会写，每次都需要父母帮助": 0.0, "立意不深刻，情感表达不真挚": 21.8, "不会写，写作文抄网上或者抄AI": 20.9, "素材选择不恰当，套模板，作文内容比较老套": 6.3}, "6": {"语言不生动，作文内容只会用一些大白话/网络用语": 53.5, "内容不具体，写出来的作文内容流水账": 47.2, "目前写作符合校内要求，还想继续提升孩子的表达能力": 15.5, "害怕抗拒写作文，每次都磨磨蹭蹭": 0.0, "不会写，每次都需要父母帮助": 0.0, "立意不深刻，情感表达不真挚": 24.0, "不会写，写作文抄网上或者抄AI": 22.8, "素材选择不恰当，套模板，作文内容比较老套": 10.7}}, "all": {"语言不生动，作文内容只会用一些大白话/网络用语": 51.9, "内容不具体，写出来的作文内容流水账": 47.0, "目前写作符合校内要求，还想继续提升孩子的表达能力": 20.0, "害怕抗拒写作文，每次都磨磨蹭蹭": 19.2, "不会写，每次都需要父母帮助": 16.7, "立意不深刻，情感表达不真挚": 7.6, "不会写，写作文抄网上或者抄AI": 7.2, "素材选择不恰当，套模板，作文内容比较老套": 5.1}, "resp": {"2": 0, "3": 1051, "4": 826, "5": 527, "6": 413, "ALL": 2817}}, "25暑·语文其他问题": {"opts": ["阅读题能得部分分数，很难拿到满分", "基础不牢，知识点掌握的不透彻，举一反三能力弱", "专注力不够，做作业拖沓，注意力不集中", "粗心马虎，总是出现小错误", "阅读题不会写或者答了但是不得分", "我家孩子目前学习状态很好，没什么问题", "孩子不会的题不知道问谁，家长不会讲"], "data": {"2": {"阅读题能得部分分数，很难拿到满分": 0.0, "基础不牢，知识点掌握的不透彻，举一反三能力弱": 0.0, "专注力不够，做作业拖沓，注意力不集中": 0.0, "粗心马虎，总是出现小错误": 0.0, "阅读题不会写或者答了但是不得分": 0.0, "我家孩子目前学习状态很好，没什么问题": 0.0, "孩子不会的题不知道问谁，家长不会讲": 0.0}, "3": {"阅读题能得部分分数，很难拿到满分": 45.1, "基础不牢，知识点掌握的不透彻，举一反三能力弱": 36.3, "专注力不够，做作业拖沓，注意力不集中": 40.5, "粗心马虎，总是出现小错误": 42.2, "阅读题不会写或者答了但是不得分": 14.4, "我家孩子目前学习状态很好，没什么问题": 15.9, "孩子不会的题不知道问谁，家长不会讲": 1.6}, "4": {"阅读题能得部分分数，很难拿到满分": 61.3, "基础不牢，知识点掌握的不透彻，举一反三能力弱": 44.6, "专注力不够，做作业拖沓，注意力不集中": 39.7, "粗心马虎，总是出现小错误": 38.1, "阅读题不会写或者答了但是不得分": 23.7, "我家孩子目前学习状态很好，没什么问题": 8.5, "孩子不会的题不知道问谁，家长不会讲": 2.3}, "5": {"阅读题能得部分分数，很难拿到满分": 64.5, "基础不牢，知识点掌握的不透彻，举一反三能力弱": 44.4, "专注力不够，做作业拖沓，注意力不集中": 40.0, "粗心马虎，总是出现小错误": 32.1, "阅读题不会写或者答了但是不得分": 30.9, "我家孩子目前学习状态很好，没什么问题": 6.1, "孩子不会的题不知道问谁，家长不会讲": 3.6}, "6": {"阅读题能得部分分数，很难拿到满分": 64.4, "基础不牢，知识点掌握的不透彻，举一反三能力弱": 39.2, "专注力不够，做作业拖沓，注意力不集中": 32.7, "粗心马虎，总是出现小错误": 27.8, "阅读题不会写或者答了但是不得分": 28.8, "我家孩子目前学习状态很好，没什么问题": 9.0, "孩子不会的题不知道问谁，家长不会讲": 5.1}}, "all": {"阅读题能得部分分数，很难拿到满分": 56.3, "基础不牢，知识点掌握的不透彻，举一反三能力弱": 40.7, "专注力不够，做作业拖沓，注意力不集中": 39.0, "粗心马虎，总是出现小错误": 37.0, "阅读题不会写或者答了但是不得分": 22.3, "我家孩子目前学习状态很好，没什么问题": 10.9, "孩子不会的题不知道问谁，家长不会讲": 2.7}, "resp": {"2": 0, "3": 1051, "4": 826, "5": 527, "6": 413, "ALL": 2817}}, "25暑·长期课程关注因素": {"opts": ["课程是否有趣，孩子是否喜欢", "授课内容是否有对思维的延伸训练（校外内容）", "主讲是否专业", "授课内容与校内是否匹配", "班主任老师伴学及答疑服务", "品牌是否可靠"], "data": {"2": {"课程是否有趣，孩子是否喜欢": 0.0, "授课内容是否有对思维的延伸训练（校外内容）": 0.0, "主讲是否专业": 0.0, "授课内容与校内是否匹配": 0.0, "班主任老师伴学及答疑服务": 0.0, "品牌是否可靠": 0.0}, "3": {"课程是否有趣，孩子是否喜欢": 69.3, "授课内容是否有对思维的延伸训练（校外内容）": 66.5, "主讲是否专业": 38.3, "授课内容与校内是否匹配": 37.6, "班主任老师伴学及答疑服务": 20.5, "品牌是否可靠": 17.2}, "4": {"课程是否有趣，孩子是否喜欢": 68.4, "授课内容是否有对思维的延伸训练（校外内容）": 62.7, "主讲是否专业": 39.3, "授课内容与校内是否匹配": 40.7, "班主任老师伴学及答疑服务": 20.9, "品牌是否可靠": 14.6}, "5": {"课程是否有趣，孩子是否喜欢": 64.7, "授课内容是否有对思维的延伸训练（校外内容）": 64.9, "主讲是否专业": 44.0, "授课内容与校内是否匹配": 36.2, "班主任老师伴学及答疑服务": 21.1, "品牌是否可靠": 18.2}, "6": {"课程是否有趣，孩子是否喜欢": 58.1, "授课内容是否有对思维的延伸训练（校外内容）": 65.1, "主讲是否专业": 43.6, "授课内容与校内是否匹配": 36.8, "班主任老师伴学及答疑服务": 24.9, "品牌是否可靠": 15.7}}, "all": {"课程是否有趣，孩子是否喜欢": 66.5, "授课内容是否有对思维的延伸训练（校外内容）": 64.9, "主讲是否专业": 40.5, "授课内容与校内是否匹配": 38.1, "班主任老师伴学及答疑服务": 21.4, "品牌是否可靠": 16.4}, "resp": {"2": 0, "3": 1051, "4": 826, "5": 527, "6": 413, "ALL": 2817}}}};
+const GRADES=['2','3','4','5','6'];
+const GL={2:'二年级',3:'三年级',4:'四年级',5:'五年级',6:'六年级'};
+const GC={2:'#E8826A',3:'#E8B44A',4:'#5BAA8A',5:'#6A8DB8',6:'#9B7DB8'};
+const SEASONS=['25秋','26寒','26春'];
+
+// Tab定义：写作/阅读三期对比 + 25暑诊断3题
+const TABS=[
+  {id:'w',type:'trend',mod:'写作模块',short:'写作·三期趋势'},
+  {id:'r',type:'trend',mod:'阅读模块',short:'阅读·三期趋势'},
+  {id:'s1',type:'diag',key:'25暑·作文最突出问题',short:'25暑·作文问题'},
+  {id:'s2',type:'diag',key:'25暑·语文其他问题',short:'25暑·语文问题'},
+  {id:'s3',type:'diag',key:'25暑·长期课程关注因素',short:'25暑·选课因素'},
+  {id:'ch',type:'channel',short:'26春·四渠道对标'},
+];
+const CHDATA = {"channels": ["199尖子生", "99IP(刘磊)", "199陈心", "内部导流"], "size": {"199尖子生": 20271, "99IP(刘磊)": 4222, "199陈心": 981, "内部导流": 7525}, "q": {"写作": {"199尖子生": {"n": 9225, "opts": {"结构框架，能让文章结构更清晰，分段更明确": 46.4, "精彩好句，积累优美词句、修辞手法运用，让作文的语文更生动形象": 37.2, "素材拓展，补充贴合孩子生活/课本的写作素材、案例，解决“没东西可写”的问题": 46.1, "迁移运用，针对同一类型的作文可以举一反三，达到“学完能直接用”的效果": 28.9, "思想深度，帮助孩子明确写作立意，文章中能写出自己的观点": 54.1, "其他": 1.1}}, "99IP(刘磊)": {"n": 2598, "opts": {"结构框架，能让文章结构更清晰，分段更明确": 57.0, "素材拓展，补充贴合孩子生活/课本的写作素材、案例，解决“没东西可写”的问题": 57.4, "精彩好句，积累优美词句、修辞手法运用，让作文的语文更生动形象": 48.7, "思想深度，帮助孩子明确写作立意，文章中能写出自己的观点": 69.7, "迁移运用，针对同一类型的作文可以举一反三，达到“学完能直接用”的效果": 36.7, "其他": 1.0}}, "199陈心": {"n": 380, "opts": {"思想深度，帮助孩子明确写作立意，文章中能写出自己的观点": 71.6, "结构框架，能让文章结构更清晰，分段更明确": 56.8, "素材拓展，补充贴合孩子生活/课本的写作素材、案例，解决“没东西可写”的问题": 55.5, "精彩好句，积累优美词句、修辞手法运用，让作文的语文更生动形象": 50.0, "迁移运用，针对同一类型的作文可以举一反三，达到“学完能直接用”的效果": 30.5, "其他": 1.1}}, "内部导流": {"n": 3354, "opts": {"思想深度，帮助孩子明确写作立意，文章中能写出自己的观点": 60.7, "素材拓展，补充贴合孩子生活/课本的写作素材、案例，解决“没东西可写”的问题": 45.9, "精彩好句，积累优美词句、修辞手法运用，让作文的语文更生动形象": 40.5, "迁移运用，针对同一类型的作文可以举一反三，达到“学完能直接用”的效果": 27.8, "结构框架，能让文章结构更清晰，分段更明确": 46.6, "其他": 1.2}}}, "阅读": {"199尖子生": {"n": 9225, "opts": {"对内容的理解能力，帮助孩子解决分析人物情感或分析作者观点类型的内容": 67.7, "阅读题解题思路，帮助孩子解决看到题目不知道怎么作答的情况": 69.4, "阅读速度与效率，针对长篇文本或复杂内容，教孩子快速定位关键信息，避免考试中因读得慢而做不完题": 40.6, "新考法题目训练，带孩子多练习一些当下的热门新考法题目": 33.9, "阅读素养与写作素材积累，通过精读经典文本、拓展优质阅读内容，帮助孩子积累可用于写作的素材": 43.3, "其他": 0.7}}, "99IP(刘磊)": {"n": 2598, "opts": {"对内容的理解能力，帮助孩子解决分析人物情感或分析作者观点类型的内容": 73.5, "阅读题解题思路，帮助孩子解决看到题目不知道怎么作答的情况": 72.1, "阅读速度与效率，针对长篇文本或复杂内容，教孩子快速定位关键信息，避免考试中因读得慢而做不完题": 43.0, "新考法题目训练，带孩子多练习一些当下的热门新考法题目": 36.9, "阅读素养与写作素材积累，通过精读经典文本、拓展优质阅读内容，帮助孩子积累可用于写作的素材": 47.3, "其他": 1.0}}, "199陈心": {"n": 380, "opts": {"阅读题解题思路，帮助孩子解决看到题目不知道怎么作答的情况": 72.9, "阅读素养与写作素材积累，通过精读经典文本、拓展优质阅读内容，帮助孩子积累可用于写作的素材": 43.7, "阅读速度与效率，针对长篇文本或复杂内容，教孩子快速定位关键信息，避免考试中因读得慢而做不完题": 38.9, "对内容的理解能力，帮助孩子解决分析人物情感或分析作者观点类型的内容": 75.0, "新考法题目训练，带孩子多练习一些当下的热门新考法题目": 32.4, "其他": 1.3}}, "内部导流": {"n": 3354, "opts": {"对内容的理解能力，帮助孩子解决分析人物情感或分析作者观点类型的内容": 67.9, "阅读素养与写作素材积累，通过精读经典文本、拓展优质阅读内容，帮助孩子积累可用于写作的素材": 46.1, "新考法题目训练，带孩子多练习一些当下的热门新考法题目": 38.2, "阅读速度与效率，针对长篇文本或复杂内容，教孩子快速定位关键信息，避免考试中因读得慢而做不完题": 35.5, "阅读题解题思路，帮助孩子解决看到题目不知道怎么作答的情况": 63.8, "其他": 1.1}}}, "续报": {"199尖子生": {"n": 9225, "opts": {"再想想:看看效果再定": 71.4, "会的:孩子喜欢，价格合适": 26.3, "不考虑:课程没有达到预期": 2.5}}, "99IP(刘磊)": {"n": 2598, "opts": {"再想想:看看效果再定": 73.6, "会的:孩子喜欢，价格合适": 24.7, "不考虑:课程没有达到预期": 2.3}}, "199陈心": {"n": 380, "opts": {"会的:孩子喜欢，价格合适": 25.8, "再想想:看看效果再定": 71.6, "不考虑:课程没有达到预期": 2.6}}, "内部导流": {"n": 3354, "opts": {"再想想:看看效果再定": 74.9, "会的:孩子喜欢，价格合适": 18.3, "不考虑:课程没有达到预期": 7.2}}}, "作文满意": {"199尖子生": {"n": 9225, "opts": {"4分-挺喜欢的": 39.8, "5分-超级喜欢": 55.4, "3分-一般般": 4.6, "2分-不太喜欢": 0.2, "1分-完全不喜欢": 0.2}}, "99IP(刘磊)": {"n": 2598, "opts": {"4分-挺喜欢的": 43.5, "5分-超级喜欢": 50.9, "3分-一般般": 6.0, "2分-不太喜欢": 0.2, "1分-完全不喜欢": 0.2}}, "199陈心": {"n": 380, "opts": {"5分-超级喜欢": 55.0, "4分-挺喜欢的": 40.3, "3分-一般般": 4.7}}, "内部导流": {"n": 3354, "opts": {"5分-超级喜欢": 50.7, "3分-一般般": 5.7, "4分-挺喜欢的": 43.4, "1分-完全不喜欢": 0.2, "2分-不太喜欢": 0.4}}}, "阅读满意": {"199尖子生": {"n": 9225, "opts": {"4分-挺喜欢的": 39.4, "5分-超级喜欢": 55.2, "3分-一般般": 5.1, "1分-完全不喜欢": 0.2, "2分-不太喜欢": 0.2}}, "99IP(刘磊)": {"n": 2598, "opts": {"4分-挺喜欢的": 41.8, "5分-超级喜欢": 52.0, "3分-一般般": 6.5, "2分-不太喜欢": 0.2, "1分-完全不喜欢": 0.2}}, "199陈心": {"n": 380, "opts": {"5分-超级喜欢": 55.3, "4分-挺喜欢的": 39.2, "3分-一般般": 5.3, "2分-不太喜欢": 0.3}}, "内部导流": {"n": 3354, "opts": {"5分-超级喜欢": 51.6, "4分-挺喜欢的": 42.1, "3分-一般般": 6.1, "1分-完全不喜欢": 0.4, "2分-不太喜欢": 0.2}}}}};
+const CHCOLOR={'199尖子生':'#9B7DB8','99IP(刘磊)':'#C47D5A','199陈心':'#5B8A72','内部导流':'#6A8DB8'};
+
+const CONC={
+'w':{title:'剥离年级结构后，写作需求在26春出现全年级同步跃升——「思想深度」是最强增长极（2-5年级普涨+13~19pp），需求从"术"（好句/结构）升级到"道"（立意深度）。但各期年级构成差异极大（25秋三年级占48.6%，26春二年级占18.3%），全年级合计会失真，故必须锁定同一年级看趋势。6年级在26春样本收缩至910人（占5.1%），且多项指标反向，单列存档、趋势存疑。',
+  ins:[
+    {icon:'🚀',t:'思想深度：全年级同步跃升',d:'2-5年级26春较25秋普涨+13~19pp（2年级+18.9、4年级+16.9），独立年级看均成立，是真实需求升级而非结构假象。'},
+    {icon:'⚠️',t:'年级构成漂移，合计口径失真',d:'25秋三年级占48.6%、二年级仅3.1%；26春二年级涨到18.3%、六年级掉到5.1%。全年级合计会被结构放大/稀释，锁定年级才可靠。'},
+    {icon:'📉',t:'6年级反向，样本收缩',d:'26春6年级仅910人，结构框架-5.5pp、思想深度回落至49.1%，与2-5年级背离，建议单列并标注样本不足。'}
+  ]},
+'r':{title:'阅读需求主线清晰稳定：「阅读题解题思路」与「对内容的理解能力」长期双高位（近70%），是全年级刚需。26春「内容理解」在2-5年级同步上行（+6~8pp）。「新考法训练」是最典型的年级分化项（高年级更高），但单年级三期内几乎不动——此前合计口径显示的"新考法上升"实为高年级占比变化带来的结构效应，需澄清。',
+  ins:[
+    {icon:'🎯',t:'解题思路+内容理解=双刚需',d:'两项在各年级三期均近70%高位，是课程必保的基础模块，续报承诺应重点绑定这两项能力产出。'},
+    {icon:'🔍',t:'"新考法上升"是结构假象',d:'合计口径25秋34.4%→26寒37.3%，但单年级几乎不动，升幅来自26寒高年级占比上升（6年级7.1%→11.3%）。'},
+    {icon:'📈',t:'内容理解普涨',d:'26春2-5年级「内容理解」较25秋+6~8pp，与写作「思想深度」升级形成"理解-表达"闭环。'}
+  ]},
+'s1':{title:'25暑诊断题（合计2817人，3-6年级有效，二年级无样本）：作文痛点高度集中在「语言不生动/大白话」51.9% 与「内容流水账」47.0%，是全年级压倒性TOP2。低年级更怕写（"害怕抗拒"随年级前段偏高），高年级转向"写不深"（"立意不深刻"5→6年级升至21.8/24.0%）。',
+  ins:[
+    {icon:'✍️',t:'语言与内容是共性痛点',d:'"语言不生动"51.9%、"内容流水账"47.0%远超其他，各年级一致，是写作课基础模块设计的锚点。'},
+    {icon:'🔄',t:'从"不敢写"到"写不深"',d:'低年级"害怕抗拒写作"占比偏高；高年级"立意不深刻/情感不真挚"抬升，与后续三期"思想深度"需求上升相互印证。'},
+    {icon:'🤖',t:'高年级出现"抄AI"信号',d:'5-6年级"写作文抄网上或抄AI"达20.9/22.8%，是需关注的新型依赖问题。'}
+  ]},
+'s2':{title:'25暑语文综合问题：「阅读题能得部分分、很难拿满分」56.3% 居首，且随年级急升（3年级45.1%→4年级61.3%），精准答题是核心焦虑。中低年级伴随「基础不牢」「专注力不足」「粗心马虎」等学习习惯问题（三年级粗心42.2%最高）。',
+  ins:[
+    {icon:'📊',t:'阅读"拿满分难"随年级飙升',d:'从三年级45.1%升到四年级61.3%后高位维持，四年级是阅读精准答题焦虑的拐点，与校内阅读分值跃升吻合。'},
+    {icon:'🧩',t:'低年级是习惯问题',d:'专注力39%、粗心37%、基础不牢40.7%集中在中低年级，家长诉求偏"矫正学习习惯"而非纯技法。'},
+    {icon:'📈',t:'高年级转向能力瓶颈',d:'"阅读题不会写/不得分"从三年级14.4%升到五年级30.9%，高年级痛点由习惯转为硬能力。'}
+  ]},
+'s3':{title:'25暑长期选课因素：「课程有趣/孩子喜欢」66.5% 与「思维延伸训练（校外内容）」64.9% 并列第一——中价家长既要兴趣驱动、也要超纲增值。「校内匹配」仅38.1%，说明该客群更看重拓展而非补校内；「品牌」16.4%最低，结果与内容导向明显。',
+  ins:[
+    {icon:'🎈',t:'兴趣与超纲并重',d:'"有趣孩子喜欢"66.5%与"思维延伸"64.9%双高，课程卖点应同时强调趣味性与校外拔高价值。'},
+    {icon:'📚',t:'弱校内匹配诉求',d:'"校内匹配"38.1%不高，中价客群定位偏素养拓展，宣传不宜过度强调"补校内同步"。'},
+    {icon:'🏷️',t:'品牌非决策关键',d:'"品牌可靠"仅16.4%垫底，家长高度结果/内容导向，续报靠可见成果而非品牌背书。'}
+  ]},
+'ch':{title:'26春四渠道对标（仅未退款用户，按用户ID关联问卷）：以199尖子生(作文主品/新人文中价特训班，~2万人)为基准，两个IP品(99IP刘磊/199陈心)需求强度明显更高——写作·思想深度尖子生54.1% vs IP品70%左右。内部导流需求接近尖子生但续报最弱。续报意愿：尖子生26.3%、IP品25%左右、内部导流仅18.3%且"没达预期"7.2%(其余渠道约2.5%)。满意度尖子生与199陈心并列最高(超喜欢55%)。',
+  ins:[
+    {icon:'🔥',t:'IP品需求强度最高',d:'写作·思想深度：199尖子生54.1% < 内部导流60.7% < 99IP 69.7% < 199陈心71.6%。IP品用户被名师内容吸引，学习目标最明确。'},
+    {icon:'💰',t:'内部导流续报是洼地',d:'"会续报"尖子生26.3%、IP品约25%、内部导流仅18.3%；"没达预期"内部导流7.2%是其余渠道(约2.5%)的近3倍，印证转化弱的老问题。'},
+    {icon:'⭐',t:'满意度尖子生领先',d:'作文/阅读"超级喜欢"199尖子生55.4/55.2%与199陈心并列最高；199陈心仅380份(第9期)，小样本需谨慎。'}
+  ]}
+};
+
+let activeTab='w', trendOpt=0;
+function init(){renderTabs();render();}
+function renderTabs(){
+  const el=document.getElementById('tabs');el.innerHTML='';
+  TABS.forEach(t=>{
+    const b=document.createElement('button');
+    b.className='tab-btn'+(t.id===activeTab?' active':'');
+    b.textContent=t.short;
+    b.onclick=()=>{activeTab=t.id;trendOpt=0;renderTabs();render();};
+    el.appendChild(b);
+  });
+}
+function render(){
+  const tab=TABS.find(t=>t.id===activeTab);
+  const c=CONC[activeTab];
+  let h='<div class="page active">';
+  h+='<div class="top-section"><div class="conclusion-card">🔍 '+c.title+'</div><div class="insights-panel">';
+  c.ins.forEach(i=>{h+='<div class="insight"><div class="insight-icon">'+i.icon+'</div><div><div class="insight-title">'+i.t+'</div><div class="insight-text">'+i.d+'</div></div></div>';});
+  h+='</div></div>';
+  h+= tab.type==='trend'?renderTrendTab(tab):(tab.type==='diag'?renderDiagTab(tab):renderChannelTab(tab));
+  h+='<div class="footer">数据来源：人文学情问卷底表 141-145学季 · 分母=各题去重答卷人数 · 分析：洛书</div></div>';
+  document.getElementById('content').innerHTML=h;
+}
+
+function heatClass(v){return v>=60?'heat-h':v>=40?'heat-m':v>=20?'heat-l':'heat-v';}
+
+// 每个模块: 结论卡片 = {标题, 结论文字, 关联需求项[], 图注}
+const TREND_CARDS={
+  '写作模块':[
+    {t:'结论1｜「思想深度」是最强增长极，2-5年级同步跃升',
+     d:'26春较25秋，2-5年级"思想深度"普涨+13~19pp（2年级+18.9、4年级+16.9、5年级+13.5），锁定同一年级看均成立，是真实需求升级而非年级结构假象。写作重心从"术"（好句/结构）升级到"道"（立意深度）。',
+     opts:['思想深度，帮助孩子明确写作立意，文章中能写出自己的观点'],
+     cap:'图1｜写作·思想深度 三期×分年级占比（%）——看2-5年级26春整列跳升'},
+    {t:'结论2｜结构/素材/好句在26春同步抬升（2-5年级）',
+     d:'除思想深度外，结构框架、素材拓展、精彩好句三项在2-5年级26春齐涨+8~11pp，说明整体写作需求认知在26春系统性提升，而非单项突出。',
+     opts:['结构框架，能让文章结构更清晰，分段更明确','素材拓展，补充贴合孩子生活/课本的写作素材、案例，解决“没东西可写”的问题','精彩好句，积累优美词句、修辞手法运用，让作文的语文更生动形象'],
+     cap:'图2｜写作·结构/素材/好句 三期×分年级占比（%）——看26春各年级整体上移'},
+    {t:'结论3｜6年级反向，样本收缩需单列',
+     d:'6年级26春样本仅910人（占5.1%，较25秋1348人收缩），"思想深度"回落至49.1%、"结构框架"-5.5pp，与2-5年级背离。建议6年级单列存档、趋势存疑，不并入主力年级叙事。',
+     opts:['思想深度，帮助孩子明确写作立意，文章中能写出自己的观点','结构框架，能让文章结构更清晰，分段更明确'],
+     cap:'图3｜写作·思想深度&结构框架 6年级三期（%）——看6年级列的反向/回落'},
+  ],
+  '阅读模块':[
+    {t:'结论1｜「内容理解+解题思路」双刚需长期高位',
+     d:'两项在各年级三期均近70%高位，是全年级、跨期稳定的核心刚需。26春"内容理解"在2-5年级同步上行+6~8pp（2年级+7.8、4年级+8.3），与写作"思想深度"升级形成"理解-表达"闭环。',
+     opts:['对内容的理解能力，帮助孩子解决分析人物情感或分析作者观点类型的内容','阅读题解题思路，帮助孩子解决看到题目不知道怎么作答的情况'],
+     cap:'图4｜阅读·内容理解&解题思路 三期×分年级占比（%）——看双刚需高位+26春内容理解上行'},
+    {t:'结论2｜「新考法」是年级分化项，但非需求真升',
+     d:'"新考法训练"高年级明显更高（5-6年级>低年级），是最典型的年级分化项。但锁定单年级看，三期内几乎不动——此前全年级合计显示的"新考法上升"实为26寒高年级占比上升（6年级7.1%→11.3%）带来的结构假象。',
+     opts:['新考法题目训练，带孩子多练习一些当下的热门新考法题目'],
+     cap:'图5｜阅读·新考法训练 三期×分年级占比（%）——看高低年级差异大、但同年级三期平稳'},
+  ]
+};
+
+function renderTrendTab(tab){
+  const md=DATA.modules[tab.mod], comp=DATA.composition[tab.mod];
+  let h='<div class="q-card"><div class="q-title">'+tab.mod+' · 25秋 → 26寒 → 26春 · 结论配图</div><div class="q-text">每条结论下方配一张可单独截图的热力图（期次×年级）。行=25秋/26寒/26春，列=年级，颜色越深占比越高。</div></div>';
+  // 年级构成条(前置说明)
+  h+='<div class="card"><div class="section-title">👥 各期答卷年级构成（先看结构漂移，解释为何要分年级）</div>';
+  SEASONS.forEach(s=>{
+    const cc=comp[s];
+    h+='<div class="comp-row"><div class="comp-label">'+s+'（N='+cc.N.toLocaleString()+'）</div><div class="comp-bar">';
+    GRADES.forEach(g=>{const w=cc[g];if(w>0)h+='<div class="comp-seg" style="width:'+w+'%;background:'+GC[g]+'">'+(w>=6?w+'%':'')+'</div>';});
+    h+='</div></div>';
+  });
+  h+='<div class="note">⚠️ 25秋三年级占48.6%、二年级仅3.1%；26春二年级涨到18.3%、六年级降到5.1%。构成差异大，"全年级合计"失真，故下方锁定同一年级看趋势。</div></div>';
+  // 逐条结论 + 专属热力图
+  (TREND_CARDS[tab.mod]||[]).forEach(card=>{
+    h+='<div class="card">';
+    h+='<div class="section-title">📌 '+card.t+'</div>';
+    h+='<div style="font-size:14px;line-height:1.85;color:var(--c-text);background:linear-gradient(135deg,#FFF8F0,#F0F7F4);border:1px solid #E6DDD0;border-radius:12px;padding:16px 20px;margin-bottom:14px">'+card.d+'</div>';
+    h+=renderOptHeatmap(md, card.opts);
+    h+='<div class="note">'+card.cap+'</div>';
+    h+='</div>';
+  });
+  return h;
+}
+
+// 聚焦若干需求项的"期次×年级"热力图(行=期次,列=年级),可单独截图
+function renderOptHeatmap(md, opts){
+  let h='<div class="heatmap-wrap"><table class="heatmap"><thead><tr><th>需求项 · 期次 \\ 年级</th>';
+  GRADES.forEach(g=>{h+='<th style="color:'+GC[g]+'">'+GL[g]+'</th>';});
+  h+='</tr></thead><tbody>';
+  opts.forEach((o,oi)=>{
+    SEASONS.forEach((s,si)=>{
+      h+='<tr><td>'+(si===0?'<b>'+shortOpt(o)+'</b> · ':'　　　　')+s+'</td>';
+      GRADES.forEach(g=>{const v=md.data[o][s][g];h+='<td class="'+heatClass(v)+'">'+v+'</td>';});
+      h+='</tr>';
+    });
+    if(oi<opts.length-1) h+='<tr><td colspan="6" style="background:transparent;padding:3px"></td></tr>';
+  });
+  h+='</tbody></table></div>';
+  return h;
+}
+
+function shortOpt(o){return o.split('，')[0].split('（')[0];}
+
+function renderTrendHeatmap(md){
+  // 表头：选项 | 各年级(每年级3期)
+  let h='<div class="heatmap-wrap"><table class="heatmap"><thead><tr><th>需求项 \\ 年级·期次</th>';
+  GRADES.forEach(g=>{h+='<th colspan="3" style="color:'+GC[g]+'">'+GL[g]+'</th>';});
+  h+='</tr><tr><th></th>';
+  GRADES.forEach(g=>{SEASONS.forEach(s=>{h+='<th class="season-h" style="color:'+GC[g]+'99">'+s.replace('25','').replace('26','')+'</th>';});});
+  h+='</tr></thead><tbody>';
+  md.opts.forEach(o=>{
+    h+='<tr><td>'+shortOpt(o)+'</td>';
+    GRADES.forEach(g=>{SEASONS.forEach(s=>{const v=md.data[o][s][g];h+='<td class="'+heatClass(v)+'">'+v+'</td>';});});
+    h+='</tr>';
+  });
+  h+='</tbody></table></div>';
+  return h;
+}
+
+function renderDiagTab(tab){
+  const d=DATA.diag_25summer[tab.key];
+  const validG=GRADES.filter(g=>d.resp[g]>0);
+  let h='<div class="q-card"><div class="q-title">25暑（142学季）· 诊断型学情</div><div class="q-text">'+tab.key.split('·')[1]+'　（合计有效答卷 '+d.resp.ALL.toLocaleString()+' 人，二年级无样本）</div></div>';
+  h+='<div class="bottom-section">';
+  h+='<div class="card"><div class="section-title">📋 分年级占比热力表</div>';
+  h+='<div class="heatmap-wrap"><table class="heatmap"><thead><tr><th>选项 \\ 年级</th><th style="color:var(--c-accent)">合计</th>';
+  validG.forEach(g=>{h+='<th style="color:'+GC[g]+'">'+GL[g]+'</th>';});
+  h+='</tr></thead><tbody>';
+  d.opts.forEach(o=>{
+    h+='<tr><td>'+o+'</td><td class="'+heatClass(d.all[o])+'">'+d.all[o]+'</td>';
+    validG.forEach(g=>{const v=d.data[g][o];h+='<td class="'+heatClass(v)+'">'+v+'</td>';});
+    h+='</tr>';
+  });
+  h+='</tbody></table></div></div>';
+  // 合计排序条形
+  h+='<div class="card"><div class="section-title">📊 全年级合计占比排序</div>';
+  const maxv=Math.max(...d.opts.map(o=>d.all[o]));
+  d.opts.forEach(o=>{
+    const v=d.all[o];
+    h+='<div style="margin-bottom:12px"><div style="font-size:12.5px;color:var(--c-text2);margin-bottom:4px">'+o+'</div>';
+    h+='<div style="display:flex;align-items:center;gap:8px"><div style="flex:1;height:20px;background:#F2E4D8;border-radius:6px;overflow:hidden"><div style="width:'+(v/maxv*100)+'%;height:100%;background:var(--c-accent);border-radius:6px"></div></div><span style="font-size:13px;font-weight:700;color:var(--c-accent);min-width:44px;text-align:right">'+v+'%</span></div></div>';
+  });
+  h+='</div></div>';
+  return h;
+}
+
+function renderChannelTab(tab){
+  const CH=CHDATA.channels, size=CHDATA.size;
+  let h='<div class="q-card"><div class="q-title">26春(145) · 三渠道对标 · 仅未退款用户</div><div class="q-text">识别规则：key_from含 99rwip=99IP(刘磊)、含 199rwlq=199陈心、一级渠道=辅导召回=内部导流　｜　规模：内部导流 '+size['内部导流'].toLocaleString()+' · 99IP '+size['99IP(刘磊)'].toLocaleString()+' · 199陈心 '+size['199陈心'].toLocaleString()+'</div></div>';
+  // 需求对比: 写作 & 阅读 分组横向柱
+  ['写作','阅读'].forEach(qt=>{
+    const q=CHDATA.q[qt];
+    // 用内部导流的选项顺序
+    let opts=Object.keys(q['内部导流'].opts).filter(o=>o!=='其他');
+    opts.sort((a,b)=>q['99IP(刘磊)'].opts[b]-q['99IP(刘磊)'].opts[a]);
+    h+='<div class="card"><div class="section-title">📊 '+qt+'模块需求 · 三渠道对比（n：内部导流'+q['内部导流'].n+' / 99IP'+q['99IP(刘磊)'].n+' / 199陈心'+q['199陈心'].n+'）</div>';
+    opts.forEach(o=>{
+      h+='<div style="margin-bottom:14px"><div style="font-size:12.5px;color:var(--c-text2);margin-bottom:5px;font-weight:600">'+shortOpt(o)+'</div>';
+      CH.forEach(c=>{
+        const v=q[c].opts[o]||0;
+        h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:3px"><span style="font-size:11px;color:'+CHCOLOR[c]+';min-width:78px;font-weight:600">'+c+'</span><div style="flex:1;height:16px;background:#F2E4D8;border-radius:5px;overflow:hidden"><div style="width:'+v+'%;height:100%;background:'+CHCOLOR[c]+';border-radius:5px"></div></div><span style="font-size:12px;font-weight:700;color:'+CHCOLOR[c]+';min-width:42px;text-align:right">'+v+'%</span></div>';
+      });
+      h+='</div>';
+    });
+    h+='</div>';
+  });
+  // 续报 + 满意度
+  h+='<div class="bottom-section">';
+  // 续报
+  h+='<div class="card"><div class="section-title">🔄 续报意愿对比</div>';
+  const rn=CHDATA.q['续报'];
+  const rnopts=['会的:孩子喜欢，价格合适','再想想:看看效果再定','不考虑:课程没有达到预期'];
+  const rnlabel={'会的:孩子喜欢，价格合适':'会续报','再想想:看看效果再定':'再想想','不考虑:课程没有达到预期':'不考虑'};
+  h+='<table class="heatmap" style="width:100%"><thead><tr><th>渠道</th>';
+  rnopts.forEach(o=>{h+='<th>'+rnlabel[o]+'</th>';});
+  h+='</tr></thead><tbody>';
+  CH.forEach(c=>{
+    h+='<tr><td style="color:'+CHCOLOR[c]+';font-weight:700">'+c+'</td>';
+    rnopts.forEach(o=>{const v=rn[c].opts[o]||0;h+='<td class="'+heatClass(v)+'">'+v+'%</td>';});
+    h+='</tr>';
+  });
+  h+='</tbody></table><div class="note">"会续报"IP品(25%左右)明显高于内部导流(18.3%)；"不考虑"内部导流7.2%约为IP品3倍。</div></div>';
+  // 满意度(4+5分合计)
+  h+='<div class="card"><div class="section-title">⭐ 满意度对比（5分超喜欢 / 4+分满意）</div>';
+  h+='<table class="heatmap" style="width:100%"><thead><tr><th>渠道</th><th>作文·5分</th><th>作文·4+</th><th>阅读·5分</th><th>阅读·4+</th></tr></thead><tbody>';
+  CH.forEach(c=>{
+    const sw=CHDATA.q['作文满意'][c].opts, sr=CHDATA.q['阅读满意'][c].opts;
+    const w5=sw['5分-超级喜欢']||0, w4=w5+(sw['4分-挺喜欢的']||0);
+    const r5=sr['5分-超级喜欢']||0, r4=r5+(sr['4分-挺喜欢的']||0);
+    h+='<tr><td style="color:'+CHCOLOR[c]+';font-weight:700">'+c+'</td><td class="'+heatClass(w5)+'">'+w5.toFixed(1)+'%</td><td class="'+heatClass(w4)+'">'+w4.toFixed(1)+'%</td><td class="'+heatClass(r5)+'">'+r5.toFixed(1)+'%</td><td class="'+heatClass(r4)+'">'+r4.toFixed(1)+'%</td></tr>';
+  });
+  h+='</tbody></table><div class="note">三渠道4+满意度均93-95%高位；199陈心"超级喜欢"占比最高，小样本(380)下略偏高需谨慎。</div></div>';
+  h+='</div>';
+  return h;
+}
+
+function setTrend(i){trendOpt=i;render();}
+
+function drawTrend(){
+  const canvas=document.getElementById('trendCanvas');if(!canvas)return;
+  const tab=TABS.find(t=>t.id===activeTab);const md=DATA.modules[tab.mod];
+  const opt=md.opts[trendOpt];
+  const dpr=window.devicePixelRatio||1;const rect=canvas.getBoundingClientRect();
+  canvas.width=rect.width*dpr;canvas.height=rect.height*dpr;
+  const ctx=canvas.getContext('2d');ctx.scale(dpr,dpr);
+  const W=rect.width,H=rect.height;const padL=48,padR=24,padT=24,padB=40;
+  const plotW=W-padL-padR,plotH=H-padT-padB;
+  ctx.clearRect(0,0,W,H);
+  // y range across all grades/seasons for this opt
+  let all=[];GRADES.forEach(g=>SEASONS.forEach(s=>all.push(md.data[opt][s][g])));
+  let vmin=Math.min(...all),vmax=Math.max(...all);const range=(vmax-vmin)||1;
+  const y0=vmin-range*0.2,y1=vmax+range*0.2,yr=y1-y0;
+  ctx.strokeStyle='#EBE6DC';ctx.lineWidth=1;ctx.font='11px Noto Sans SC';ctx.fillStyle='#A69F8E';ctx.textAlign='right';
+  for(let i=0;i<=4;i++){const y=padT+(1-i/4)*plotH;const v=(y0+i/4*yr).toFixed(0);
+    ctx.beginPath();ctx.setLineDash([4,4]);ctx.moveTo(padL,y);ctx.lineTo(W-padR,y);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillText(v+'%',padL-8,y+4);}
+  // x labels = seasons
+  ctx.textAlign='center';ctx.fillStyle='#7A7362';ctx.font='12px Noto Sans SC';
+  SEASONS.forEach((s,i)=>{const x=padL+(i/(SEASONS.length-1))*plotW;ctx.fillText(s,x,H-14);});
+  // one line per grade
+  GRADES.forEach(g=>{
+    const pts=SEASONS.map((s,i)=>({x:padL+(i/(SEASONS.length-1))*plotW,y:padT+(1-(md.data[opt][s][g]-y0)/yr)*plotH,v:md.data[opt][s][g]}));
+    ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);pts.forEach((p,i)=>{if(i>0)ctx.lineTo(p.x,p.y);});
+    ctx.strokeStyle=GC[g];ctx.lineWidth=g==='6'?2:2.6;ctx.lineJoin='round';
+    if(g==='6')ctx.setLineDash([5,4]);ctx.stroke();ctx.setLineDash([]);
+    pts.forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,4,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();ctx.strokeStyle=GC[g];ctx.lineWidth=2.4;ctx.stroke();});
+  });
+  // legend
+  const lg=document.getElementById('legend');
+  if(lg)lg.innerHTML=GRADES.map(g=>'<div class="legend-item"><div class="legend-dot" style="background:'+GC[g]+'"></div>'+GL[g]+(g==='6'?'(虚线·样本少)':'')+'</div>').join('');
+}
+window.addEventListener('resize',()=>{const t=TABS.find(t=>t.id===activeTab);if(t&&t.type==='trend')drawTrend();});
+init();
+</script>
+
+</body>
+</html>
